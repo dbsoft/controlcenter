@@ -1,0 +1,5 @@
+NAME CC WINDOWAPI
+           
+DESCRIPTION 'Control Center Crossplatform'
+
+STACKSIZE 128000

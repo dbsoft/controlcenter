@@ -1,0 +1,43 @@
+# $Id: makefile.emx,v 1.1 2002/12/21 09:16:02 nuke Exp $ 
+
+# HandyFTP Makefile
+
+CC = gcc
+RM = rm -f
+RC = rc
+MAKE = make
+COMPRESS = lxlite
+
+DEFS =
+LIBS =
+
+CFLAGS = -O2 -Zomf -Zmt -D__ST_MT_ERRNO__ -I. -Wall
+LDFLAGS = -lsocket
+RCFLAGS = -r
+
+
+OBJECTS = compat.obj handyftp.obj
+
+SOURCES = compat.c handyftp.c
+
+all: handyftp.exe
+
+$(OBJECTS):
+	$(CC) $(CFLAGS) -c $<	
+
+dw.obj:
+	$(CC) $(CFLAGS) -c os2\dw.c	
+
+handyftp.exe:  $(OBJECTS) dw.obj
+	$(RC) $(RCFLAGS) handyftp.rc
+	$(CC) $(CFLAGS) $(DEFS) -o handyftp.exe $(OBJECTS) dw.obj $(LDFLAGS) handyftp.def handyftp.res
+#	$(COMPRESS) handyftp.exe
+
+clean: 
+	$(RM) $(OBJECTS) dw.obj handyftp.exe handyftp.res
+
+dw.obj: os2\dw.c dw.h
+compat.obj: compat.c compat.h
+handyftp.obj: handyftp.c handyftp.h hftpextr.h site.h compat.h dw.h
+handyftp.res: handyftp.rc handyftp.h hftpextr.h
+

@@ -1,0 +1,54 @@
+# $Id: Makefile.in,v 1.2 2003/02/18 20:17:30 nuke Exp $ 
+
+# Control Center GTK Makefile
+
+DWINCDIR=/home/nuke/netlabs/dwindows
+DWLIBDIR=/home/nuke/netlabs/dwindows/lib
+
+CC = @CC@
+RM = @RM@
+CP = @CP@
+MAKE = @MAKE@
+MKDIR = @MKDIR@
+INSTALL = @INSTALL@
+
+LIBS = @LIBS@
+INCLUDES = @INCLUDES@
+
+CFLAGS = @CFLAGS@ -D__UNIX__ -DDW_RESOURCES -I$(DWINCDIR)
+LDFLAGS = @LDFLAGS@ -L$(DWLIBDIR) -ldw -ldwcompat
+
+
+OBJECTS = cc.o statsunx.o
+
+SOURCES = cc.c statsunx.c
+
+all: cc
+
+$(OBJECTS): $(SOURCES)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $<
+
+resources.o:
+	$(CC) $(CFLAGS) $(INCLUDES) -c gtk/resources.c
+
+statsunx.o:
+	$(CC) $(CFLAGS) $(INCLUDES) -c statsunx.c
+        
+cc:  $(OBJECTS) resources.o
+	$(CC) $(CFLAGS) $(INCLUDES) -o cc $(OBJECTS) resources.o $(LDFLAGS) $(LIBS)
+
+clean: 
+	$(RM) $(OBJECTS) resources.o cc
+
+distclean: 
+	$(RM) $(OBJECTS) resources.o cc *~ os2/*~ win/*~ gtk/*~ config.cache config.log config.status Makefile config.h
+
+install:
+	$(RM) -rf /usr/local/cc
+	$(MKDIR)  /usr/local/cc
+	$(CP) -f ../config/*.typ /usr/local/cc
+	$(INSTALL) cc /usr/local/bin
+        
+resources.o: gtk/resources.c
+cc.o: cc.c cc.h config.h
+statsunx.o: statsunx.c

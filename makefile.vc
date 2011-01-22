@@ -1,0 +1,45 @@
+# Control Center Windows Makefile
+DWLIBDIR=d:\netlabs\dwindows\lib
+DWINCDIR=d:\netlabs\dwindows
+CC = cl
+CFLAGS = -c -G5 -GD -Zp1 -DWIN32 -D__WIN32__ -DMSVC -I. -I$(DWINCDIR)
+CFLAGS_DEBUG = -Zi
+CFLAGS_COMPILE = -MTd
+LIBS = wsock32.lib kernel32.lib user32.lib comctl32.lib gdi32.lib advapi32.lib shell32.lib comdlg32.lib iphlpapi.lib $(DWLIBDIR)\dw.lib $(DWLIBDIR)\dwcompat.lib
+RES = 
+LINKFLAGS = -machine:i386 -debug:full -debugtype:cv
+DLLLINKFLAGS = -dll
+LINK = link
+DEFFILE = cc.def
+
+OBJS =	cc.obj statswin.obj winmain.obj
+
+all: cc.exe
+
+clean:
+	-erase *.dll
+        -erase *.exe
+        -erase *.opt
+        -erase *.lib
+        -erase *.obj
+        -erase *.map
+        -erase *.pdb
+        -erase *.ilk
+        -erase *.exp
+        -erase *.res
+        -erase *~
+        
+ccw.res: ccw.rc
+	rc -r ccw.rc
+
+cc.exe: $(OBJS) ccw.res
+	$(LINK) @<<
+-out:$(@) -def:$(DEFFILE) -subsystem:windows
+$(LINKFLAGS)
+$(OBJS)
+$(LIBS)
+ccw.res
+<<
+        
+.c.obj:
+	$(CC) $(CFLAGS) $(CFLAGS_DEBUG) $(CFLAGS_COMPILE) $*.c

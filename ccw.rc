@@ -1,0 +1,13 @@
+/*#include <windows.h>*/
+
+#include "cc.h"
+
+
+MAIN_FRAME ICON "win\\cc.ico"
+
+/*
+IDB_BARV BITMAP "win\\barv.bmp"
+IDB_BARH BITMAP "win\\barh.bmp"
+
+IDB_TESTTOOL BITMAP "win\\testtool.bmp"
+*/

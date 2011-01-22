@@ -1,0 +1,24 @@
+/* $Id: cc.Rc,v 1.1 2002/12/21 09:16:02 nuke Exp $ */
+
+
+/* OS/2 Warp Resource Script File - Created by Universal Resource Editor */
+
+#define INCL_WINSYS
+#define INCL_WINSTDDLGS
+#define INCL_WINSTDSPIN
+#define INCL_NLS
+#define INCL_SW
+
+#include <os2.h>
+
+#include "cc.h"
+
+
+ICON MAIN_FRAME "os2\\cc.ico"
+
+/*
+BITMAP IDB_BARH "os2\\barh.bmp"
+BITMAP IDB_BARV "os2\\barv.bmp"
+
+BITMAP IDB_TESTTOOL "os2\\testtool.bmp"
+*/

@@ -1,0 +1,40 @@
+# Control Center OS/2 Makefile
+
+FXLIBDIR=d:\work\netlabs\dwindows\lib
+FXINCDIR=d:\work\netlabs\dwindows
+
+.SUFFIXES: \
+	.c .obj
+
+CFLAGS = /Ti /DOS2 /DTCPV40HDRS /I. /I$(FXINCDIR) /Sm /Ss /Q /Gm /Gt /C
+LDFLAGS = /DE /optfunc
+
+
+OBJECTS = cc.obj statsos2.obj
+
+SOURCES = cc.c statsos2.c
+
+all: cc.exe
+
+$(OBJECTS):
+	icc $(CFLAGS) %s
+
+cc.exe:  $(OBJECTS)
+	rc -r cc.rc
+	icc @<<
+	 /B" $(LDFLAGS)"
+	 /Fecc.exe
+	 so32dll.lib tcp32dll.lib si2.lib $(FXLIBDIR)\dw.lib $(FXLIBDIR)\dwcompat.lib
+	 $(OBJECTS)
+	 cc.def
+<<
+	rc -x2 cc.res cc.exe
+#	lxlite sfx.exe
+
+clean: 
+	rm $(OBJECTS) cc.exe cc.res *~
+
+
+cc.obj: cc.c cc.h
+cc.res: cc.rc cc.h
+
