@@ -306,7 +306,7 @@ void display_create(void)
 }
 
 /* This function continually updates the display windows */
-void display_update(void)
+void DWSIGNAL display_update(void)
 {
 	srand(time(NULL));
 
@@ -1201,7 +1201,7 @@ void drive_update(struct _instance *inst, HWND owner)
 	}
 }
 
-void drive_update_thread(struct _instance *inst)
+void DWSIGNAL drive_update_thread(struct _instance *inst)
 {
 	while(inst && inst->custom)
 	{

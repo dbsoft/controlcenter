@@ -115,7 +115,7 @@ HMTX hMtx;
 HWND hwndFrame, hwndHbox;
 
 void display_create(void);
-void display_update(void);
+void DWSIGNAL display_update(void);
 void display_destroy(void);
 void DWSIGNAL display_menu(HWND hwnd, void *data);
 
