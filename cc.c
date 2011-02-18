@@ -165,7 +165,7 @@ void saveconfig(void)
 }
 
 /* Generic function to parse information from a config file */
-void getline(FILE *f, char *entry, char *entrydata)
+void cc_getline(FILE *f, char *entry, char *entrydata)
 {
 	char in[256];
 	int z;
@@ -228,7 +228,7 @@ void loadconfig(void)
 	{
 		while(!feof(f))
 		{
-			getline(f, entry, entrydata);
+			cc_getline(f, entry, entrydata);
 
 			if(strcasecmp(entry, "width")==0)
 				width = atoi(entrydata);
