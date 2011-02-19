@@ -25,8 +25,6 @@
 #include <sys/param.h>
 #include <sys/dkstat.h>
 #include <sys/vmmeter.h>
-#include <kvm.h>
-#include <nlist.h>
 #include <math.h>
 #endif
 #ifdef __linux__
@@ -60,128 +58,12 @@ int Get_Uptime(unsigned long *Seconds)
 	return 0;
 }
 
-#ifdef __linux__
-int lastused = 0, lasttotal = 0;
-double lastload = 0;
-#endif
-
-#ifdef __FreeBSD__
-struct nlist namelist[] = {
-#define X_CPTIME        0
-	{ "_cp_time" },
-#define X_CNT           1
-	{ "_cnt" },
-	{""}
-};
-char *nlistf = NULL, *memf = NULL;
-
-kvm_t	*kd = 0;
-
-static int pageshift;		/* log base 2 of the pagesize */
-#define pagetok(size) ((size) << pageshift)
-#define LOG1024 10
-
-void kernel_init(void)
-{
-    register int pagesize;
-	int c;
-
-	/* get the page size with "getpagesize" and calculate pageshift from it */
-	pagesize = getpagesize();
-	pageshift = 0;
-	while (pagesize > 1)
-	{
-		pageshift++;
-		pagesize >>= 1;
-	}
-
-	if ((kd = kvm_open(NULL, NULL, NULL, O_RDONLY, "kvm_open")) == NULL)
-		return;
-
-    (void) kvm_nlist(kd, namelist);
-	if (namelist[0].n_type == 0)
-	{
-		fprintf(stderr, "cc: nlist failed\n");
-		return;
-	}
-
-    /* we only need the amount of log(2)1024 for our conversion */
-    pageshift -= LOG1024;
-}
-
-
-/*
- * kread reads something from the kernel, given its nlist index.
- */
-void kread(int nlx, void *addr, size_t size)
-{
-	char *sym;
-
-	if (namelist[nlx].n_type == 0 || namelist[nlx].n_value == 0) {
-		sym = namelist[nlx].n_name;
-		if (*sym == '_')
-			++sym;
-		fprintf(stderr, "symbol %s not defined", sym);
-	}
-	if (kvm_read(kd, namelist[nlx].n_value, addr, size) != size) {
-		sym = namelist[nlx].n_name;
-		if (*sym == '_')
-			++sym;
-		fprintf(stderr, "%s: %s", sym, kvm_geterr(kd));
-	}
-}
-double cpu_load(void)
-{
-	register int state;
-	double pct, total;
-	long cp_time[CPUSTATES], idle;
-	static long lastcp_time[CPUSTATES];
-	static int firsttime = 1;
-
-	if(!kd)
-		return 0;
-
-	if(firsttime)
-	{
-		kread(X_CPTIME, lastcp_time, sizeof(lastcp_time));
-		firsttime = 0;
-		return;
-	}
-	kread(X_CPTIME, cp_time, sizeof(cp_time));
-
-	total = 0;
-	for (state = 0; state < CPUSTATES; ++state)
-		total += cp_time[state] - lastcp_time[state];
-
-	idle = cp_time[CP_IDLE] - lastcp_time[CP_IDLE];
-
-	memcpy(lastcp_time, cp_time, sizeof(lastcp_time));
-
-	if(total)
-	{
-		pct = (double)(total - idle) / total;
-		return pct;
-	}
-	return 0;
-}
-
-unsigned long free_memory(void)
-{
-	struct vmmeter sum;
-
-	if(!kd)
-		return 0;
-
-	kread(X_CNT, &sum, sizeof(sum));
-
-	return pagetok(sum.v_free_count);
-}
-#endif
-
 int Get_Load(double *Load)
 {
 #ifdef __linux__
 	FILE *fp = fopen("/proc/stat", "r");
+	static int lastused = 0, lasttotal = 0;
+	static double lastload = 0;
 
 	*Load =0;
 
@@ -208,9 +90,28 @@ int Get_Load(double *Load)
 		fclose(fp);
 	}
 #elif defined(__FreeBSD__)
-	if(!kd)
-		kernel_init();
-	*Load = cpu_load();
+	static long lastused = 0, lasttotal = 0;
+	static double lastload = 0;
+	long counters[5], used, total;
+	size_t len;
+	
+	/* Query the free and inactive pages */
+	len = sizeof(counters);
+	sysctlbyname("kern.cp_time", &counters, &len, 0, 0);
+
+	/* Add up user, nice, system and interrupt to get total used */
+	used = counters[0] + counters[1] + counters[2] + counters[3];
+
+	/* Total adds the idle */
+	total = used + counters[4];
+
+	if(lasttotal && (total - lasttotal))
+		lastload = *Load = (double)(used-lastused)/(total-lasttotal);
+	else
+		*Load = lastload;
+
+	lastused = used;
+	lasttotal = total;
 #else
 	*Load = 0;
 #endif
@@ -223,10 +124,17 @@ int Get_Memory(long double *Memory)
 	sysinfo(&si);
 	*Memory = (long double)si.freeram;
 #elif defined(__FreeBSD__)
-	if(!kd)
-		kernel_init();
-	// This already returns in kilobytes
-	*Memory = (long double)(free_memory() * 1024);
+	int pages_free, pages_inactive;
+	size_t len;
+	
+	/* Query the free and inactive pages */
+	len = sizeof(pages_free);
+	sysctlbyname("vm.stats.vm.v_free_count", &pages_free, &len, 0, 0);
+	len = sizeof(pages_inactive);
+	sysctlbyname("vm.stats.vm.v_inactive_count", &pages_inactive, &len, 0, 0);
+
+	/* Add them together and multiply by the page size to get the total free */
+	*Memory = (pages_free + pages_inactive) * getpagesize();
 #else
 	*Memory = 0;
 #endif
