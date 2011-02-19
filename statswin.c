@@ -25,10 +25,21 @@ typedef struct
     WORD    wUnknown3;
 } SYSTEM_BASIC_INFORMATION;
 
-typedef struct
+typedef struct 
 {
-    LARGE_INTEGER   liIdleTime;
-    DWORD           dwSpare[76];
+    LARGE_INTEGER IdleTime;
+    LARGE_INTEGER ReadTransferCount;
+    LARGE_INTEGER WriteTransferCount;
+    LARGE_INTEGER OtherTransferCount;
+    ULONG ReadOperationCount;
+    ULONG WriteOperationCount;
+    ULONG OtherOperationCount;
+    ULONG AvailablePages;
+    ULONG TotalCommittedPages;
+    ULONG TotalCommitLimit;
+    ULONG PeakCommitment;
+    ULONG PageFaults;           // total soft or hard Page Faults since boot (wraps at 32-bits)
+    ULONG Reserved[74]; // unknown
 } SYSTEM_PERFORMANCE_INFORMATION;
 
 typedef struct
@@ -101,7 +112,7 @@ double NT_Load(void)
 	if (liOldIdleTime.QuadPart != 0)
 	{
 		// CurrentValue = NewValue - OldValue
-		dbIdleTime = Li2Double(SysPerfInfo.liIdleTime) - Li2Double(liOldIdleTime);
+		dbIdleTime = Li2Double(SysPerfInfo.IdleTime) - Li2Double(liOldIdleTime);
 		dbSystemTime = Li2Double(SysTimeInfo.liKeSystemTime) - Li2Double(liOldSystemTime);
 
 		// CurrentCpuIdle = IdleTime / SystemTime
@@ -112,7 +123,7 @@ double NT_Load(void)
 	}
 
 	// store new CPU's idle and system time
-	liOldIdleTime = SysPerfInfo.liIdleTime;
+	liOldIdleTime = SysPerfInfo.IdleTime;
 	liOldSystemTime = SysTimeInfo.liKeSystemTime;
 
 	return dbIdleTime/100;
@@ -199,14 +210,16 @@ int Get_Load(double *Load)
 }
 
 
-int Get_Memory(unsigned long *Memory)
+int Get_Memory(long double *Memory)
 {
-	MEMORYSTATUS ms;
+	MEMORYSTATUSEX ms;
+	
+	ms.dwLength = sizeof(ms);
 
+	GlobalMemoryStatusEx(&ms);
 
-	GlobalMemoryStatus(&ms);
-
-	*Memory = ms.dwAvailPhys;
+	// Convert to kilobytes to prevent overflows on 64 bit systems
+	*Memory = (long double)ms.ullAvailPhys;
 	return 0;
 }
 

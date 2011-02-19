@@ -1163,7 +1163,7 @@ void memory_update(struct _instance *inst, HWND owner)
 	if(inst && inst->pixmap && *(inst->pixmap))
 	{
 		TextConfig *texts = (TextConfig *)inst->custom;
-		unsigned long Memory;
+		long double Memory;
 
 		Get_Memory(&Memory);
 		ScaledPrint(&texts->text1[9], Memory, 2);

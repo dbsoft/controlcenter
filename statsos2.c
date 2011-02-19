@@ -129,9 +129,11 @@ int Get_Load(double *Load)
 	return 0;
 }
 
-int Get_Memory(unsigned long *Memory)
+int Get_Memory(long double *Memory)
 {
-	Dos16MemAvail(Memory);
+	unsigned long memory;
+	Dos16MemAvail(&memory);
+	*Memory = (long double)memory;
 	return 0;
 }
 

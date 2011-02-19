@@ -217,15 +217,16 @@ int Get_Load(double *Load)
 	return 0;
 }
 
-int Get_Memory(unsigned long *Memory)
+int Get_Memory(long double *Memory)
 {
 #ifdef __linux__
 	sysinfo(&si);
-	*Memory = si.freeram;
+	*Memory = (long double)si.freeram;
 #elif defined(__FreeBSD__)
 	if(!kd)
 		kernel_init();
-	*Memory = free_memory() * 1024;
+	// This already returns in kilobytes
+	*Memory = (long double)(free_memory() * 1024);
 #else
 	*Memory = 0;
 #endif
