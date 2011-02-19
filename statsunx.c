@@ -135,7 +135,7 @@ int Get_Memory(long double *Memory)
 	sysctlbyname("vm.stats.vm.v_inactive_count", &pages_inactive, &len, 0, 0);
 
 	/* Add them together and multiply by the page size to get the total free */
-	*Memory = (pages_free + pages_inactive) * getpagesize();
+	*Memory = (long double)(pages_free + pages_inactive) * getpagesize();
 #else
 	*Memory = 0;
 #endif
