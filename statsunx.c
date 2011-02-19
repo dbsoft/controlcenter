@@ -122,7 +122,8 @@ int Get_Memory(long double *Memory)
 {
 #ifdef __linux__
 	sysinfo(&si);
-	*Memory = (long double)si.freeram;
+	/* Recent versions of Linux require multiplying by the memory unit */
+	*Memory = (long double)(si.freeram * si.mem_unit);
 #elif defined(__FreeBSD__)
 	int pages_free, pages_inactive;
 	size_t len;
@@ -145,7 +146,7 @@ int Get_Net(unsigned long *Sent, unsigned long *Recv, unsigned long *TotalSent, 
 {
 #ifdef __linux__
 	FILE *fp = fopen("/proc/net/dev", "r");
-    static int firsttime = 1; 
+	static int firsttime = 1; 
 
 	*TotalRecv = *TotalSent = *Recv = *Sent = 0;
 
@@ -157,34 +158,42 @@ int Get_Net(unsigned long *Sent, unsigned long *Recv, unsigned long *TotalSent, 
 		while(!feof(fp))
 		{
 			char *tmp;
+			char *ifacename;
 			int packets, bytes, errs, drop, fifo, frame, compressed, multicast, sbytes, serrs;
 
 			fgets(buf, 1024, fp);
 
 			tmp = buf;
 
-			/* Find the first interface entery */
+			/* Find the first interface entry */
 			while(*tmp == ' ')
 				tmp++;
+			/* Save the start of the name */
+			ifacename = tmp;
+			/* Find the end of the interface name */
 			while(*tmp && *tmp != ':')
 				tmp++;
 
+			/* Looks like we found something! */
 			if(*tmp == ':' && if_unit < 16)
 			{
+				/* Terminate the interface name */
 				*tmp = 0;
 
 				tmp++;
 
-				sscanf(tmp, "%d %d %d %d %d %d %d %d %d", &bytes, &packets, &errs, &drop, &fifo, &frame,
+				sscanf(tmp, "%d %d %d %d %d %d %d %d %d %d", &bytes, &packets, &errs, &drop, &fifo, &frame,
 					   &compressed, &multicast, &sbytes, &serrs);
 
 				if(!firsttime)
 				{
-					*Recv = bytes - ulTotalIn[if_unit];
-					*Sent = sbytes - ulTotalOut[if_unit];
+					*Recv += bytes - ulTotalIn[if_unit];
+					*Sent += sbytes - ulTotalOut[if_unit];
 				}
-				ulTotalOut[if_unit] = *TotalSent = sbytes;
-				ulTotalIn[if_unit] = *TotalRecv = bytes;
+				ulTotalOut[if_unit] = sbytes;
+				*TotalSent += sbytes;
+				ulTotalIn[if_unit] = bytes;
+				*TotalRecv += bytes;
 				if_unit++;
 			}
 		}
