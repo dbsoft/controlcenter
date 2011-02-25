@@ -48,7 +48,8 @@ Instance gList[40]=
 unsigned long *current_colors;
 char *current_font;
 int current_color = 1, current_font_num = 0, minimized = 0;
-unsigned long x = 0, y = 0, width = 140, height = 600;
+long x = 0, y = 0;
+unsigned long width = 140, height = 600;
 
 char *fonts[4] = {
 	FONT1,
@@ -156,10 +157,10 @@ void saveconfig(void)
 	free(inipath);
 	free(inidir);
 
-	fprintf(f, "WIDTH=%d\n", width);
-	fprintf(f, "HEIGHT=%d\n", height);
-	fprintf(f, "X=%d\n", x);
-	fprintf(f, "Y=%d\n", y);
+	fprintf(f, "WIDTH=%d\n", (int)width);
+	fprintf(f, "HEIGHT=%d\n", (int)height);
+	fprintf(f, "X=%d\n", (int)x);
+	fprintf(f, "Y=%d\n", (int)y);
 
 	fclose(f);
 }
@@ -505,7 +506,7 @@ int DWSIGNAL display_motion_notify(HWND hwnd, int x, int y, int buttonmask, void
 	if(inst && button_down == 1 && (buttonmask & DW_BUTTON1_MASK))
 	{
 		int delta_x = x - dragx, delta_y = y - dragy, z;
-		unsigned long graphx, graphy;
+		long graphx, graphy;
 
 		dw_window_get_pos_size(hwndFrame, &graphx, &graphy, NULL, NULL);
 		dw_window_set_pos(hwndFrame, graphx + delta_x, graphy + delta_y);
@@ -1111,7 +1112,7 @@ void cpu_update(struct _instance *inst, HWND owner)
 
 		Get_Load(&Load);
 
-		sprintf(graph->text, "%d%%", (unsigned long)(Load*100));
+		sprintf(graph->text, "%d%%", (int)(Load*100));
 
 		graph_add_statistic(DISPLAY_CPU, (unsigned long)(Load*100));
 	}

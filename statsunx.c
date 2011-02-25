@@ -18,13 +18,18 @@
 #include <netinet/if_ether.h>
 #include <time.h>
 #include <fcntl.h>
-#ifdef __FreeBSD__
+#if defined(__MAC__)
+#include <mach/mach.h>
+#include <mach/mach_error.h>
+#endif
+#if defined(__FreeBSD__) || defined(__MAC__)
 #include <net/if_types.h>
 #include <net/if_mib.h>
 #include <sys/sysctl.h>
 #include <sys/param.h>
 #include <sys/dkstat.h>
 #include <sys/vmmeter.h>
+#include <unistd.h>
 #include <math.h>
 #endif
 #ifdef __linux__
@@ -43,7 +48,7 @@ int Get_Uptime(unsigned long *Seconds)
 #ifdef __linux__
 	sysinfo(&si);
 	*Seconds = si.uptime;
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__MAC__)
 	struct timeval boottime;
 	size_t size = sizeof(boottime);
 	time_t now;
@@ -112,6 +117,35 @@ int Get_Load(double *Load)
 
 	lastused = used;
 	lasttotal = total;
+#elif defined(__MAC__)
+	static long lastused = 0, lasttotal = 0;
+	static double lastload = 0;
+	double used = 0, total = 0;
+	natural_t cpuCount;
+	processor_info_array_t infoArray;
+	mach_msg_type_number_t infoCount;
+
+	if(!host_processor_info(mach_host_self(), PROCESSOR_CPU_LOAD_INFO, &cpuCount, &infoArray, &infoCount))
+	{
+		processor_cpu_load_info_data_t* cpuLoadInfo = (processor_cpu_load_info_data_t*) infoArray;
+			
+		for(int cpu=0;cpu<cpuCount;cpu++)
+		{
+			double thisused = cpuLoadInfo[cpu].cpu_ticks[0] + cpuLoadInfo[cpu].cpu_ticks[1] + cpuLoadInfo[cpu].cpu_ticks[3];
+			used += thisused;
+			total += thisused + cpuLoadInfo[cpu].cpu_ticks[2];
+		}
+	}
+
+	vm_deallocate(mach_task_self(), (vm_address_t)infoArray, infoCount);
+	
+	if(lasttotal && (total - lasttotal))
+		lastload = *Load = (double)(used-lastused)/(total-lasttotal);
+	else
+		*Load = lastload;
+
+	lastused = used;
+	lasttotal = total;
 #else
 	*Load = 0;
 #endif
@@ -124,15 +158,21 @@ int Get_Memory(long double *Memory)
 	sysinfo(&si);
 	/* Recent versions of Linux require multiplying by the memory unit */
 	*Memory = (long double)(si.freeram * si.mem_unit);
-#elif defined(__FreeBSD__)
-	int pages_free, pages_inactive;
+#elif defined(__FreeBSD__) || defined(__MAC__)
+	int pages_free, pages_inactive = 0;
 	size_t len;
 	
 	/* Query the free and inactive pages */
+#if defined(__MAC__)
+	len = sizeof(pages_free);
+	sysctlbyname("hw.usermem", &pages_free, &len, 0, 0);
+	pages_free = pages_free / getpagesize();
+#else
 	len = sizeof(pages_free);
 	sysctlbyname("vm.stats.vm.v_free_count", &pages_free, &len, 0, 0);
 	len = sizeof(pages_inactive);
 	sysctlbyname("vm.stats.vm.v_inactive_count", &pages_inactive, &len, 0, 0);
+#endif
 
 	/* Add them together and multiply by the page size to get the total free */
 	*Memory = (long double)(pages_free + pages_inactive) * getpagesize();
@@ -200,7 +240,7 @@ int Get_Net(unsigned long *Sent, unsigned long *Recv, unsigned long *TotalSent, 
 		firsttime = 0;
 		fclose(fp);
 	}
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__MAC__)
 	int i;
 	static int firsttime = 1;
 	struct ifmibdata ifmd;
