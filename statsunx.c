@@ -127,9 +127,11 @@ int Get_Load(double *Load)
 
 	if(!host_processor_info(mach_host_self(), PROCESSOR_CPU_LOAD_INFO, &cpuCount, &infoArray, &infoCount))
 	{
+		int cpu;
+		
 		processor_cpu_load_info_data_t* cpuLoadInfo = (processor_cpu_load_info_data_t*) infoArray;
 			
-		for(int cpu=0;cpu<cpuCount;cpu++)
+		for(cpu=0;cpu<cpuCount;cpu++)
 		{
 			double thisused = cpuLoadInfo[cpu].cpu_ticks[0] + cpuLoadInfo[cpu].cpu_ticks[1] + cpuLoadInfo[cpu].cpu_ticks[3];
 			used += thisused;
