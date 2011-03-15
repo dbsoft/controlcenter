@@ -1230,7 +1230,7 @@ void DWSIGNAL drive_update_thread(struct _instance *inst)
 }
 
 /* Skip over the floppy drives on OS/2 and Windows */
-#ifdef __UNIX__
+#if defined(__UNIX__) || defined(__MAC__)
 #define DRIVE_START 1
 #else
 #define DRIVE_START 3
