@@ -58,7 +58,7 @@ $(OBJS)
 $(LIBS)
 ccw.res
 <<
-	mt.exe /manifest cc.exe.manifest /outputresource:cc.exe;1
+	mt.exe /manifest cc.exe.manifest win\cc.exe.$(TARGET_CPU).manifest /outputresource:cc.exe;1
         
 .c.obj:
 	$(CC) $(CFLAGS) $(CFLAGS_DEBUG) $(CFLAGS_COMPILE) $*.c
