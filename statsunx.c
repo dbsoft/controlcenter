@@ -254,8 +254,9 @@ int Get_Net(unsigned long *Sent, unsigned long *Recv, unsigned long *TotalSent, 
 
 	if(sock > 0)
 	{
-		static int lastin = 0, lastout = 0;
-		int name[6], z, maxifno, currentin = 0, currentout = 0;
+		static unsigned long lastin = 0, lastout = 0;
+		int name[6], z, maxifno;
+        unsigned long currentin = 0, currentout = 0;
 		size_t len = sizeof(maxifno);
 
 		name[0] = CTL_NET;

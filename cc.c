@@ -1074,14 +1074,25 @@ void net_draw(struct _instance *inst)
 
 void ScaledPrint(char *cBuff, unsigned long long value, int decimals)
 {
-	char fstr[] = "%.0f ", *dec = &fstr[2], *not = &fstr[4];
+	char fstr[] = "%.0Lf ", *dec = &fstr[2], *not = &fstr[5];
 	long double real_value = value;
+    static unsigned long long giga = (1024*1024*1024);
 
 	*dec = decimals + '0';
 
-	if(value >= (1024*1024*1024))
+	if(value >= (giga*1024*1024))
 	{
-		real_value = (long double)value/(1024.0*1024.0*1024.0);
+ 		real_value = (long double)value/(giga*1024.0*1024.0);
+		*not = 'P';
+	}
+	else if(value >= (giga*1024))
+	{
+ 		real_value = (long double)value/(giga*1024.0);
+		*not = 'T';
+	}
+	else if(value >= giga)
+	{
+ 		real_value = (long double)value/(long double)giga;
 		*not = 'G';
 	}
 	else if(value >= (1024*1024))
@@ -1097,7 +1108,7 @@ void ScaledPrint(char *cBuff, unsigned long long value, int decimals)
    else
 	   *dec = '0';
 
-	sprintf(cBuff, fstr, (double)real_value);
+	sprintf(cBuff, fstr, (long double)real_value);
 }
 
 void cpu_update(struct _instance *inst, HWND owner)
@@ -1154,7 +1165,7 @@ void nettot_update(struct _instance *inst, HWND owner)
 	if(inst && inst->pixmap && *(inst->pixmap))
 	{
 		TextConfig *texts = (TextConfig *)inst->custom;
-		ScaledPrint(&texts->text1[7], TotalRecv, 2);
+ 		ScaledPrint(&texts->text1[7], TotalRecv, 2);
 		ScaledPrint(&texts->text2[7], TotalSent, 2);
 	}
 }
