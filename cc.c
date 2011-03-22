@@ -1072,7 +1072,7 @@ void net_draw(struct _instance *inst)
 
 }
 
-void ScaledPrint(char *cBuff, long double value, int decimals)
+void ScaledPrint(char *cBuff, unsigned long long value, int decimals)
 {
 	char fstr[] = "%.0f ", *dec = &fstr[2], *not = &fstr[4];
 	long double real_value = value;
@@ -1081,17 +1081,17 @@ void ScaledPrint(char *cBuff, long double value, int decimals)
 
 	if(value >= (1024*1024*1024))
 	{
-		real_value = value/(1024.0*1024.0*1024.0);
+		real_value = (long double)value/(1024.0*1024.0*1024.0);
 		*not = 'G';
 	}
 	else if(value >= (1024*1024))
 	{
-		real_value = value/(1024.0*1024.0);
+		real_value = (long double)value/(1024.0*1024.0);
 		*not = 'M';
 	}
 	else if(value >= 1024)
    {
-	   real_value = value/1024.0;
+	   real_value = (long double)value/1024.0;
 	   *not = 'K';
    }
    else
