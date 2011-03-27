@@ -8,38 +8,17 @@
 
 #define Li2Double(x) ((double)((x).HighPart) * 4.294967296E9 + (double)((x).LowPart))
 
-typedef struct
-{
-    DWORD   dwUnknown1;
-    ULONG   uKeMaximumIncrement;
-    ULONG   uPageSize;
-    ULONG   uMmNumberOfPhysicalPages;
-    ULONG   uMmLowestPhysicalPage;
-    ULONG   uMmHighestPhysicalPage;
-    ULONG   uAllocationGranularity;
-    PVOID   pLowestUserAddress;
-    PVOID   pMmHighestUserAddress;
-    ULONG   uKeActiveProcessors;
-    BYTE    bKeNumberProcessors;
-    BYTE    bUnknown2;
-    WORD    wUnknown3;
+typedef struct _SYSTEM_BASIC_INFORMATION {
+    BYTE Reserved1[24];
+    PVOID Reserved2[4];
+    CCHAR NumberOfProcessors;
 } SYSTEM_BASIC_INFORMATION;
 
-typedef struct 
+
+typedef struct
 {
     LARGE_INTEGER IdleTime;
-    LARGE_INTEGER ReadTransferCount;
-    LARGE_INTEGER WriteTransferCount;
-    LARGE_INTEGER OtherTransferCount;
-    ULONG ReadOperationCount;
-    ULONG WriteOperationCount;
-    ULONG OtherOperationCount;
-    ULONG AvailablePages;
-    ULONG TotalCommittedPages;
-    ULONG TotalCommitLimit;
-    ULONG PeakCommitment;
-    ULONG PageFaults;           // total soft or hard Page Faults since boot (wraps at 32-bits)
-    ULONG Reserved[74]; // unknown
+    DWORD dwSpare[76];
 } SYSTEM_PERFORMANCE_INFORMATION;
 
 typedef struct
@@ -119,7 +98,7 @@ double NT_Load(void)
 		dbIdleTime = dbIdleTime / dbSystemTime;
 
 		// CurrentCpuUsage% = 100 - (CurrentCpuIdle * 100) / NumberOfProcessors
-		dbIdleTime = 100.0 - dbIdleTime * 100.0 / (double)SysBaseInfo.bKeNumberProcessors + 0.5;
+		dbIdleTime = 100.0 - dbIdleTime * 100.0 / (double)SysBaseInfo.NumberOfProcessors + 0.5;
 	}
 
 	// store new CPU's idle and system time
