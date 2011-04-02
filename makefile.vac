@@ -1,12 +1,12 @@
 # Control Center OS/2 Makefile
 
-FXLIBDIR=d:\work\netlabs\dwindows\lib
-FXINCDIR=d:\work\netlabs\dwindows
+#DWLIBPATH=d:\work\netlabs\dwindows\lib
+#DWINCPATH=d:\work\netlabs\dwindows
 
 .SUFFIXES: \
 	.c .obj
 
-CFLAGS = /Ti /DOS2 /DTCPV40HDRS /I. /I$(FXINCDIR) /Sm /Ss /Q /Gm /Gt /C
+CFLAGS = /Ti /DOS2 /DTCPV40HDRS /I. /I$(DWINCPATH) /Sm /Ss /Q /Gm /Gt /C
 LDFLAGS = /DE /optfunc
 
 
@@ -24,7 +24,7 @@ cc.exe:  $(OBJECTS)
 	icc @<<
 	 /B" $(LDFLAGS)"
 	 /Fecc.exe
-	 so32dll.lib tcp32dll.lib si2.lib $(FXLIBDIR)\dw.lib $(FXLIBDIR)\dwcompat.lib
+	 so32dll.lib tcp32dll.lib si2.lib $(DWLIBPATH)\dw.lib $(DWLIBPATH)\dwcompat.lib
 	 $(OBJECTS)
 	 cc.def
 <<
