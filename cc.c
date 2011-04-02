@@ -300,6 +300,8 @@ void display_create(void)
 
 	restore_pos();
 
+   dw_window_set_icon(hwndFrame, (HICN)MAIN_FRAME);
+   
 	dw_window_show(hwndFrame);
 
 	dw_thread_new((void *)display_update, NULL, 0xFFFF);
