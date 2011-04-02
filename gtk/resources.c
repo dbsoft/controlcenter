@@ -13,7 +13,7 @@ long _resource_id[RESOURCE_MAX] = {
 };
 
 char *_resource_data[RESOURCE_MAX] = {
-	(char *)gwxp_xpm
+	(char *)cc_xpm
 };
 
 typedef struct _resource_struct {
