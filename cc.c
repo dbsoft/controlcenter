@@ -106,7 +106,6 @@ void saveconfig(void)
 {
 	FILE *f;
 	char *tmppath = INIDIR, *inidir, *inipath, *home = getenv("HOME");
-	int z;
 
 	update_pos();
 
@@ -199,7 +198,6 @@ void loadconfig(void)
 {
 	char *tmppath = INIDIR, *inipath, *home = getenv("HOME");
 	char entry[256], entrydata[256];
-	int moncount = -1;
 	FILE *f;
 
 	if(strcmp(INIDIR, ".") == 0)
@@ -385,8 +383,6 @@ int is_window(HWND hwnd, int which)
 
 void DWSIGNAL delete_event(HWND hwnd, void *data)
 {
-	FILE *f;
-
 	display_destroy();
 	exit(0);
 }
@@ -466,9 +462,6 @@ int DWSIGNAL display_expose(HWND hwnd, DWExpose *exp, void *data)
 /* Handles button presses on the graph window */
 int DWSIGNAL display_button_press(HWND hwnd, int x, int y, int button, void *data)
 {
-	Instance *inst = (Instance *)data;
-	int z;
-
 	/* When clicked CC should take focus, but
 	 * do it before creating the menu.
 	 */
@@ -507,7 +500,7 @@ int DWSIGNAL display_motion_notify(HWND hwnd, int x, int y, int buttonmask, void
 
 	if(inst && button_down == 1 && (buttonmask & DW_BUTTON1_MASK))
 	{
-		int delta_x = x - dragx, delta_y = y - dragy, z;
+		int delta_x = x - dragx, delta_y = y - dragy;
 		long graphx, graphy;
 
 		dw_window_get_pos_size(hwndFrame, &graphx, &graphy, NULL, NULL);
@@ -734,8 +727,6 @@ void graph_draw(struct _instance *inst)
 /* Creates a stats style display */
 void text_create(struct _instance *inst, HWND owner)
 {
-	TextConfig *texts = (TextConfig *)inst->custom;
-
 	inst->hwndDraw = calloc(2, sizeof(HWND));
 	inst->pixmap = calloc(2, sizeof(HPIXMAP));
 
@@ -820,7 +811,7 @@ void text_draw(struct _instance *inst)
 /* Draw a 1 bar style display */
 void bar_draw(struct _instance *inst)
 {
-	unsigned long width, height, z;
+	unsigned long width, height;
 	BarConfig *barconfig = (BarConfig *)inst->custom;
 
 	if(inst && inst->pixmap && *(inst->pixmap))
@@ -876,8 +867,6 @@ void bar_draw(struct _instance *inst)
 /* Creates a 1 bar style display */
 void bar_create(struct _instance *inst, HWND owner)
 {
-	BarConfig *barconfig = (BarConfig *)inst->custom;
-
 	inst->hwndDraw = calloc(2, sizeof(HWND));
 	inst->pixmap = calloc(2, sizeof(HPIXMAP));
 
@@ -896,8 +885,6 @@ void bar_create(struct _instance *inst, HWND owner)
 /* Creates the dock window */
 void desk_create(struct _instance *inst, HWND owner)
 {
-	HWND mainbox;
-	ULONG flStyle = DW_FCF_SIZEBORDER | DW_FCF_TASKLIST;
 	unsigned long *desks = (unsigned long *)inst->custom;
 	int z;
 
@@ -928,7 +915,6 @@ void desk_draw(struct _instance *inst)
 	if(inst && inst->pixmap)
 	{
 		unsigned long *desks = (unsigned long *)inst->custom;
-		int z;
 
 		for(z=0;z<*desks;z++)
 		{
@@ -958,9 +944,6 @@ void desk_draw(struct _instance *inst)
 /* Creates the dock window */
 void net_create(struct _instance *inst, HWND owner)
 {
-	HWND mainbox;
-	ULONG flStyle = DW_FCF_SIZEBORDER | DW_FCF_TASKLIST;
-
 	inst->hwndDraw = calloc(2, sizeof(HWND));
 	inst->pixmap = calloc(2, sizeof(HPIXMAP));
 
@@ -1019,7 +1002,7 @@ void net_draw(struct _instance *inst)
 		if(width > (RIGHT_SIDE + LEFT_SIDE))
 		{
 			int item = 0, myheight = (height - 6)/2, mywidth = width - 6;
-			unsigned long max, average;
+			unsigned long max;
 
 			/* Draw vertical lines */
 			for(z=((4)-(current_time%4))*GRID_STEP;z<(width - (RIGHT_SIDE + LEFT_SIDE));z+=(GRID_STEP*4))
@@ -1297,8 +1280,6 @@ void init_drives(void)
 
 int main(int argc, char *argv[])
 {
-	int cx, cy;
-
 	current_colors = colors;
 	current_font = fonts[0];
 

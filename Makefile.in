@@ -15,8 +15,8 @@ INSTALL = @INSTALL@
 LIBS = @LIBS@
 INCLUDES = @INCLUDES@
 
-CFLAGS = @CFLAGS@ -D__UNIX__ -DDW_RESOURCES -I$(DWINCDIR)
-LDFLAGS = @LDFLAGS@ -L$(DWLIBDIR) -ldwindows -ldwcompat
+CFLAGS = @CFLAGS@ -D__UNIX__ -DDW_RESOURCES
+LDFLAGS = @LDFLAGS@ -ldwindows -ldwcompat
 
 
 OBJECTS = cc.o statsunx.o

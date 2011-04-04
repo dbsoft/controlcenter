@@ -243,7 +243,6 @@ int Get_Net(unsigned long *Sent, unsigned long *Recv, unsigned long *TotalSent, 
 		fclose(fp);
 	}
 #elif defined(__FreeBSD__) || defined(__MAC__)
-	int i;
 	static int firsttime = 1;
 	struct ifmibdata ifmd;
 
