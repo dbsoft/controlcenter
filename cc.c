@@ -271,7 +271,7 @@ void display_create(void)
 	int z = 0;
 	ULONG flStyle = DW_FCF_SIZEBORDER | DW_FCF_TASKLIST;
 
-#ifdef __UNIX__
+#if defined(__UNIX__) && !defined(__MAC__)
 	/* Enlightenment, the window manager we anticipate on
 	 * Red Hat does not make a size border unless it has
 	 * a titlebar in it's default theme.  So we must force
