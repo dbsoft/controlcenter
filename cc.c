@@ -105,7 +105,7 @@ void restore_pos(void)
 void saveconfig(void)
 {
 	FILE *f;
-	char *tmppath = INIDIR, *inidir, *inipath, *home = getenv("HOME");
+	char *tmppath = INIDIR, *inidir, *inipath, *home = dw_user_dir();
 
 	update_pos();
 
@@ -196,7 +196,7 @@ void cc_getline(FILE *f, char *entry, char *entrydata)
 /* Load the logview.ini file from disk setting all the necessary flags */
 void loadconfig(void)
 {
-	char *tmppath = INIDIR, *inipath, *home = getenv("HOME");
+	char *tmppath = INIDIR, *inipath, *home = dw_user_dir();
 	char entry[256], entrydata[256];
 	FILE *f;
 
