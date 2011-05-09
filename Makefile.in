@@ -2,9 +2,6 @@
 
 # Control Center GTK Makefile
 
-#DWINCDIR=/home/nuke/netlabs/dwindows
-#DWLIBDIR=/home/nuke/netlabs/dwindows/lib
-
 CC = @CC@
 RM = @RM@
 CP = @CP@
