@@ -298,7 +298,9 @@ void display_create(void)
 
 	restore_pos();
 
-   dw_window_set_icon(hwndFrame, (HICN)MAIN_FRAME);
+	dw_window_set_icon(hwndFrame, DW_RESOURCE(MAIN_FRAME));
+   
+	dw_window_default(hwndFrame, gList[0].hwndDraw[0]);
    
 	dw_window_show(hwndFrame);
 
@@ -390,7 +392,7 @@ void DWSIGNAL delete_event(HWND hwnd, void *data)
 /* Context menus */
 void DWSIGNAL display_menu(HWND hwnd, void *data)
 {
-	switch((int)data)
+	switch(DW_POINTER_TO_INT(data))
 	{
 	case IDM_EXIT:
 		{
@@ -1203,7 +1205,7 @@ void DWSIGNAL drive_update_thread(struct _instance *inst)
 	while(inst && inst->custom)
 	{
 		BarConfig *bars = (BarConfig *)inst->custom;
-		int drive = (int)bars->user;
+		int drive = DW_POINTER_TO_INT(bars->user);
 
 		if(inst->pixmap && *(inst->pixmap))
 		{
@@ -1270,7 +1272,7 @@ void init_drives(void)
 
 			sprintf(bars->text, "%s: ", fsname);
 
-			bars->user = (void *)z;
+			bars->user = DW_INT_TO_POINTER(z);
 			bars->len = strlen(bars->text);
 
 			dw_thread_new((void *)drive_update_thread, &gList[m], 0xFFFF);
