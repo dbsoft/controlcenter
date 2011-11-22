@@ -15,12 +15,14 @@ INCLUDES = @INCLUDES@
 CFLAGS = @CFLAGS@ -D__UNIX__ -DDW_RESOURCES
 LDFLAGS = @LDFLAGS@ -ldwindows -ldwcompat
 
+TARGET=cc
+DISPLAYNAME=Control Center
 
 OBJECTS = cc.o statsunx.o
 
 SOURCES = cc.c statsunx.c
 
-all: cc
+all: $(TARGET)
 
 $(OBJECTS): $(SOURCES)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<
@@ -31,8 +33,8 @@ resources.o:
 statsunx.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c statsunx.c
         
-cc:  $(OBJECTS) resources.o
-	$(CC) $(CFLAGS) $(INCLUDES) -o cc $(OBJECTS) resources.o $(LDFLAGS) $(LIBS)
+$(TARGET):  $(OBJECTS) resources.o
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(TARGET) $(OBJECTS) resources.o $(LDFLAGS) $(LIBS)
 	-mac/finishup.sh "$(DISPLAYNAME)" "$(TARGET)"
                 
 installer: $(TARGET)
@@ -40,16 +42,16 @@ installer: $(TARGET)
 	-mac/installer.sh "$(DISPLAYNAME)" "$(TARGET)"
 
 clean: 
-	$(RM) $(OBJECTS) resources.o cc
+	$(RM) $(OBJECTS) resources.o $(TARGET)
 
 distclean: 
-	$(RM) $(OBJECTS) resources.o cc *~ os2/*~ win/*~ gtk/*~ config.cache config.log config.status Makefile config.h
+	$(RM) $(OBJECTS) resources.o $(TARGET) *~ os2/*~ win/*~ gtk/*~ config.cache config.log config.status Makefile config.h
 
 install:
-	$(RM) -rf /usr/local/cc
-	$(MKDIR)  /usr/local/cc
-	$(CP) -f ../config/*.typ /usr/local/cc
-	$(INSTALL) cc /usr/local/bin
+	$(RM) -rf /usr/local/$(TARGET)
+	$(MKDIR)  /usr/local/$(TARGET)
+	$(CP) -f ../config/*.typ /usr/local/$(TARGET)
+	$(INSTALL) $(TARGET) /usr/local/bin
         
 resources.o: gtk/resources.c
 cc.o: cc.c cc.h config.h
