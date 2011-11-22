@@ -33,6 +33,25 @@ cc.exe:  $(OBJECTS)
 	rc -x2 cc.res cc.exe
 #	lxlite sfx.exe
 
+# Create an installer using Installer/2...
+# Packinst and ace2 need to be in the path...
+installer:
+    rm -rf install\package
+    md install\package
+    copy cc.exe install\package
+    copy $(DWINCPATH)\dw.dll install\package
+    copy $(DWINCPATH)\dwcompat.dll install\package
+    copy readme.txt install\package
+    copy readme.txt install\scripts
+    rm -f install\cc.ace install\misc.ace
+    cd install\package
+    ace2 -r a ..\cc.ace *
+    cd ..\scripts
+    ace2 a ..\misc.ace *
+    cd ..
+    copy $(SFXPATH)\sfx.exe .\sfx.exe
+    packinst cc.cfg
+    
 clean: 
 	rm $(OBJECTS) cc.exe cc.res *~
 

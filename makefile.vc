@@ -49,6 +49,20 @@ clean:
         -erase *.res
         -erase *~
         
+# Create a zip file for use with Nullsoft's Install system
+# Requires NSIS and makensis to be in the PATH     
+installer:
+    rd /s /q install\package
+    md install\package
+    copy cc.exe install\package
+    copy $(DWINCDIR)\dw.dll install\package
+    copy $(DWINCDIR)\dwcompat.dll install\package
+    copy readme.txt install\package
+    cd install\package
+    copy ..\cc-$(TARGET_CPU).nsi cc.nsi
+    makensis cc.nsi
+    move cc*win*.exe ..
+    
 ccw.res: ccw.rc
 	rc -r ccw.rc
 
