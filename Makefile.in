@@ -47,7 +47,9 @@ clean:
 distclean: 
 	$(RM) $(OBJECTS) resources.o $(TARGET) *~ os2/*~ win/*~ gtk/*~ config.cache config.log config.status Makefile config.h
 
-install:
+FORCE:
+
+install: FORCE
 	$(RM) -rf /usr/local/$(TARGET)
 	$(MKDIR)  /usr/local/$(TARGET)
 	$(CP) -f ../config/*.typ /usr/local/$(TARGET)
