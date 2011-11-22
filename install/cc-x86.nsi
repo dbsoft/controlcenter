@@ -63,7 +63,7 @@ Section "Dummy Section" SecDummy
   SetOutPath "$INSTDIR"
   
   ; Binaries
-  File dwib.exe
+  File cc.exe
   File *.dll
   ; Help
   File readme.txt
