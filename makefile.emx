@@ -11,7 +11,10 @@ COMPRESS = lxlite
 DEFS =
 LIBS =
 
-CFLAGS = -O2 -Zomf -Zmt -D__ST_MT_ERRNO__ -I. -Wall
+include Version
+VER_REV := $(shell hg log -r . --template={rev})
+
+CFLAGS = -O2 -Zomf -Zmt -D__ST_MT_ERRNO__ -I. -Wall -DVER_MAJ=$(VER_MAJ) -DVER_MIN=$(VER_MIN) -DVER_REV=$(VER_REV)
 LDFLAGS = -lsocket
 RCFLAGS = -r
 

@@ -8,7 +8,16 @@ TARGET=cc
 .SUFFIXES: \
 	.c .obj
 
-CFLAGS = /Ti /DOS2 /DTCPV40HDRS /D__TARGET__=\"$(TARGET)\" /I. /I$(DWINCPATH) /Sm /Ss /Q /Gm /Gt /C
+# Check the Mercurial revision number if possible
+!if ![hg log -r . --template="VER_REV={rev}" > HG.REV]
+!include HG.REV
+!else
+VER_REV=0
+!endif
+
+!include Version
+
+CFLAGS = /Ti /DOS2 /DTCPV40HDRS /D__TARGET__=\"$(TARGET)\" /I. /I$(DWINCPATH) /DVER_MAJ=$(VER_MAJ) /DVER_MIN=$(VER_MIN) /DVER_REV=$(VER_REV) /Sm /Ss /Q /Gm /Gt /C
 LDFLAGS = /DE /optfunc
 
 
@@ -53,7 +62,7 @@ installer:
     packinst cc.cfg
     
 clean: 
-	rm $(OBJECTS) cc.exe cc.res *~
+	rm -f $(OBJECTS) cc.exe cc.res HG.REV *~
 
 
 cc.obj: cc.c cc.h
