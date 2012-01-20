@@ -332,7 +332,10 @@ void DWSIGNAL display_update(void)
 			z++;
 		}
 		dw_mutex_unlock(hMtx);
-
+        
+#if defined(__MAC__) && !defined(GARBAGE_COLLECT)
+        _dw_pool_drain();
+#endif
 	}
 	display_destroy();
 }
