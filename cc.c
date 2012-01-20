@@ -20,7 +20,7 @@ enum display_list {
 #if 0
 	DISPLAY_DESK,
 #endif
-    DISPLAY_CPU,
+	DISPLAY_CPU,
 	DISPLAY_NET,
 	DISPLAY_NETAVG,
 	DISPLAY_NETMAX,
@@ -68,8 +68,8 @@ unsigned long colors[COLOR_MAX] = {
 	DW_RGB(0, 0, 128),
 	DW_RGB(200, 204, 200),
 	DW_RGB(2, 130, 130),
-    DW_RGB(2, 254, 250),
-    DW_RGB(250, 254, 2)
+	DW_RGB(2, 254, 250),
+	DW_RGB(250, 254, 2)
 };
 
 unsigned long Sent = 0, Recv = 0, TotalSent = 0, TotalRecv = 0, MaxSent = 0, MaxRecv = 0;
@@ -299,9 +299,9 @@ void display_create(void)
 	restore_pos();
 
 	dw_window_set_icon(hwndFrame, DW_RESOURCE(MAIN_FRAME));
-   
+
 	dw_window_default(hwndFrame, gList[0].hwndDraw[0]);
-   
+
 	dw_window_show(hwndFrame);
 
 	dw_thread_new((void *)display_update, NULL, 0xFFFF);
@@ -332,9 +332,9 @@ void DWSIGNAL display_update(void)
 			z++;
 		}
 		dw_mutex_unlock(hMtx);
-        
+
 #if defined(__MAC__) && !defined(GARBAGE_COLLECT)
-        _dw_pool_drain();
+		_dw_pool_drain();
 #endif
 	}
 	display_destroy();
@@ -401,8 +401,7 @@ void DWSIGNAL display_menu(HWND hwnd, void *data)
 		{
 			update_pos();
 			saveconfig();
-			display_destroy();
-			exit(0);
+			dw_main_quit();
 		}
 		break;
 	case IDM_PROP:
@@ -800,7 +799,7 @@ void text_draw(struct _instance *inst)
 				dw_draw_text(0, hPixmap, start1 + LEFT_SIDE, ((((height - (TOP_BOTTOM * 2))/2) - 12)/2), texts->text1);
 				dw_draw_text(0, hPixmap, start2 + LEFT_SIDE, ((height - (TOP_BOTTOM * 2))/2) + ((((height - (TOP_BOTTOM * 2))/2)-12)/2), texts->text2);
 			}
-            else
+			else
 				dw_draw_text(0, hPixmap, start1 + LEFT_SIDE, TOP_BOTTOM, texts->text1);
 
 			/* Blit the image from the memory pixmap to the screen window */
@@ -1027,7 +1026,7 @@ void net_draw(struct _instance *inst)
 				for(z=(width - 4);z>2;z-=GRID_STEP)
 				{
 					int point = (int)((float)myheight * ((float)values[item]/(float)max));
-                    if(point)
+					if(point)
 						dw_draw_rect(0, hPixmap, TRUE, z,  (myheight - point) + 3, GRID_STEP, point);
 					item++;
 				}
@@ -1064,41 +1063,41 @@ void net_draw(struct _instance *inst)
 
 void ScaledPrint(char *cBuff, long double value, int decimals)
 {
-    char fstr[] = "%.0Lf ", *dec = &fstr[2], *not = &fstr[5];
-    long double real_value = value;
-    static long double giga = 1073741824.0;
+	char fstr[] = "%.0Lf ", *dec = &fstr[2], *not = &fstr[5];
+	long double real_value = value;
+	static long double giga = 1073741824.0;
 
-    *dec = decimals + '0';
+	*dec = decimals + '0';
 
-    if(value >= (giga*1024*1024))
-    {
-        real_value = (long double)value/(giga*1024.0*1024.0);
-        *not = 'P';
-    }
-    else if(value >= (giga*1024))
-    {
-        real_value = (long double)value/(giga*1024.0);
-        *not = 'T';
-    }
-    else if(value >= giga)
-    {
-        real_value = (long double)value/(long double)giga;
-        *not = 'G';
-    }
-    else if(value >= (1024*1024))
-    {
-        real_value = (long double)value/(1024.0*1024.0);
-        *not = 'M';
-    }
-    else if(value >= 1024)
-    {
-        real_value = (long double)value/1024.0;
-        *not = 'K';
-    }
-    else
-        *dec = '0';
+	if(value >= (giga*1024*1024))
+	{
+		real_value = (long double)value/(giga*1024.0*1024.0);
+		*not = 'P';
+	}
+	else if(value >= (giga*1024))
+	{
+		real_value = (long double)value/(giga*1024.0);
+		*not = 'T';
+	}
+	else if(value >= giga)
+	{
+		real_value = (long double)value/(long double)giga;
+		*not = 'G';
+	}
+	else if(value >= (1024*1024))
+	{
+		real_value = (long double)value/(1024.0*1024.0);
+		*not = 'M';
+	}
+	else if(value >= 1024)
+	{
+		real_value = (long double)value/1024.0;
+		*not = 'K';
+	}
+	else
+		*dec = '0';
 
-    sprintf(cBuff, fstr, (long double)real_value);
+	sprintf(cBuff, fstr, (long double)real_value);
 }
 
 void cpu_update(struct _instance *inst, HWND owner)
@@ -1226,6 +1225,9 @@ void DWSIGNAL drive_update_thread(struct _instance *inst)
 			ScaledPrint(&bars->text[bars->len], free, 1);
 			dw_mutex_unlock(hMtx);
 		}
+#if defined(__MAC__) && !defined(GARBAGE_COLLECT)
+		_dw_pool_drain();
+#endif
 		msleep(1000);
 	}
 }
@@ -1303,6 +1305,8 @@ int main(int argc, char *argv[])
 	display_destroy();
 
 	sockshutdown();
+
+	dw_exit(0);
 	return 0;
 }
 
