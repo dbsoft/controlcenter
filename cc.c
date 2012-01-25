@@ -333,9 +333,6 @@ void DWSIGNAL display_update(void)
 		}
 		dw_mutex_unlock(hMtx);
 
-#if defined(__MAC__) && !defined(GARBAGE_COLLECT)
-		_dw_pool_drain();
-#endif
 	}
 	display_destroy();
 }
@@ -399,6 +396,7 @@ void DWSIGNAL display_menu(HWND hwnd, void *data)
 	{
 	case IDM_EXIT:
 		{
+			display_active = FALSE;
 			update_pos();
 			saveconfig();
 			dw_main_quit();
@@ -1204,7 +1202,7 @@ void drive_update(struct _instance *inst, HWND owner)
 
 void DWSIGNAL drive_update_thread(struct _instance *inst)
 {
-	while(inst && inst->custom)
+	while(inst && inst->custom && display_active)
 	{
 		BarConfig *bars = (BarConfig *)inst->custom;
 		int drive = DW_POINTER_TO_INT(bars->user);
@@ -1225,9 +1223,6 @@ void DWSIGNAL drive_update_thread(struct _instance *inst)
 			ScaledPrint(&bars->text[bars->len], free, 1);
 			dw_mutex_unlock(hMtx);
 		}
-#if defined(__MAC__) && !defined(GARBAGE_COLLECT)
-		_dw_pool_drain();
-#endif
 		msleep(1000);
 	}
 }
