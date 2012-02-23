@@ -1,4 +1,4 @@
-#include "compat.h"
+#include "dwcompat.h"
 #include "dw.h"
 #include "cc.h"
 #include "stats.h"
