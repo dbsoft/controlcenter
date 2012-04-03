@@ -53,9 +53,6 @@ distclean:
 FORCE:
 
 install: FORCE
-	$(RM) -rf /usr/local/$(TARGET)
-	$(MKDIR)  /usr/local/$(TARGET)
-	$(CP) -f ../config/*.typ /usr/local/$(TARGET)
 	$(INSTALL) $(TARGET) /usr/local/bin
         
 resources.o: gtk/resources.c
