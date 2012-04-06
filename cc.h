@@ -4,6 +4,8 @@
 #define IDM_MINIMIZE  205
 #define IDM_PROP      231
 
+#define APP_NAME      "Control Center"
+
 #ifndef RESOURCE_IDS_ONLY
 
 #define GRID_STEP 2
@@ -16,32 +18,13 @@
 #define TOP_BOTTOM LEFT_SIDE
 
 #ifdef __OS2__
-#define FONT1 "8.Helv"
-#define FONT1NAME "Helvetica"
-#define FONT2 "9.WarpSans"
-#define FONT2NAME "WarpSans"
-#define FONT3 "9.WarpSans Bold"
-#define FONT3NAME "WarpSans Bold"
-#define FONT4 "9.Courier"
-#define FONT4NAME "Courier"
+#define DEFFONT "8.Helv"
 #elif defined(__WIN32__)
-#define FONT1 "9.Arial"
-#define FONT1NAME "Arial"
-#define FONT2 "9.Tahoma"
-#define FONT2NAME "Tahoma"
-#define FONT3 "9.Verdana"
-#define FONT3NAME "Verdana"
-#define FONT4 "9.Courier"
-#define FONT4NAME "Courier"
+#define DEFFONT "9.Arial"
+#elif defined(__MAC__)
+#define DEFFONT "9.Monaco"
 #else
-#define FONT1 "monospace 10"
-#define FONT1NAME "Monospace"
-#define FONT2 "sans 10"
-#define FONT2NAME "Sans"
-#define FONT3 "helvetica medium 12"
-#define FONT3NAME "Helvetica"
-#define FONT4 "courier medium 12"
-#define FONT4NAME "Courier"
+#define DEFFONT "10.monospace"
 #endif
 
 #define fAttached       0x00000001
@@ -93,6 +76,20 @@ typedef struct _netconfig {
 	void *user;
 } NetConfig;
 
+typedef struct _saveconfig {
+	char name[20];
+	int type;
+	void *data;
+} SaveConfig;
+
+enum type_list {
+	TYPE_NONE = 0,
+	TYPE_INT,
+	TYPE_ULONG,
+	TYPE_FLOAT,
+	TYPE_STRING
+};
+
 enum color_list {
 	COLOR_BACK,
 	COLOR_BAR,
@@ -104,8 +101,23 @@ enum color_list {
 	COLOR_AVERAGE,
 	COLOR_GRID,
 	COLOR_RECV,
-    COLOR_SENT,
+	COLOR_SENT,
 	COLOR_MAX
+};
+
+char *color_names[] = {
+	"Background Color",
+	"Bar Color",
+	"Highlight Color",
+	"Lowlight Color",
+	"Border Color",
+	"Thumb Color",
+	"Text Color",
+	"Average Color",
+	"Grid Color",
+	"Receive Color",
+	"Sent Color",
+	NULL
 };
 
 /* Graph Variables */
@@ -115,9 +127,12 @@ HMTX hMtx;
 HWND hwndFrame, hwndHbox;
 
 void display_create(void);
-void DWSIGNAL display_update(void);
+int DWSIGNAL display_update(void);
 void display_destroy(void);
-void DWSIGNAL display_menu(HWND hwnd, void *data);
+int DWSIGNAL display_menu(HWND hwnd, void *data);
+int DWSIGNAL display_exit(HWND hwnd, void *data);
+int DWSIGNAL display_minimize(HWND hwnd, void *data);
+int DWSIGNAL display_properties(HWND hwnd, void *data);
 
 /* Display function declarations */
 void graph_draw(struct _instance *inst);

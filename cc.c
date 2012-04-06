@@ -45,20 +45,14 @@ Instance gList[40]=
 	{0, 0, 0}
 };
 
-unsigned long *current_colors;
 char *current_font;
 int current_color = 1, current_font_num = 0, minimized = 0;
 long x = 0, y = 0;
 unsigned long width = 140, height = 600;
+HWND in_properties = 0;
 
-char *fonts[4] = {
-	FONT1,
-	FONT2,
-	FONT3,
-	FONT4
-};
-
-unsigned long colors[COLOR_MAX] = {
+/* Array of current drawing colors */
+unsigned long current_colors[COLOR_MAX] = {
 	DW_RGB(152, 160, 168),
 	DW_RGB(128, 128, 128),
 	DW_RGB(248, 252, 248),
@@ -70,6 +64,28 @@ unsigned long colors[COLOR_MAX] = {
 	DW_RGB(2, 130, 130),
 	DW_RGB(2, 254, 250),
 	DW_RGB(250, 254, 2)
+};
+
+/* Array to aid in automated configuration saving */
+SaveConfig Config[] = 
+{
+	{ "WIDTH",					TYPE_ULONG,	&width },
+	{ "HEIGHT",					TYPE_ULONG,	&height },
+	{ "X",						TYPE_INT,	&x },
+	{ "Y",						TYPE_INT,	&y },
+	{ "FONT",					TYPE_STRING,&current_font },
+	{ "COLOR_BACK",			TYPE_ULONG,	&(current_colors[COLOR_BACK]) },
+	{ "COLOR_BAR",				TYPE_ULONG,	&(current_colors[COLOR_BAR]) },
+	{ "COLOR_HIGH_LIGHT",	TYPE_ULONG,	&(current_colors[COLOR_HIGH_LIGHT]) },
+	{ "COLOR_LOW_LIGHT",		TYPE_ULONG,	&(current_colors[COLOR_LOW_LIGHT]) },
+	{ "COLOR_BORDER",			TYPE_ULONG,	&(current_colors[COLOR_BORDER]) },
+	{ "COLOR_THUMB",			TYPE_ULONG,	&(current_colors[COLOR_THUMB]) },
+	{ "COLOR_TEXT",			TYPE_ULONG,	&(current_colors[COLOR_TEXT]) },
+	{ "COLOR_AVERAGE",		TYPE_ULONG,	&(current_colors[COLOR_AVERAGE]) },
+	{ "COLOR_GRID",			TYPE_ULONG,	&(current_colors[COLOR_GRID]) },
+	{ "COLOR_RECV",			TYPE_ULONG,	&(current_colors[COLOR_RECV]) },
+	{ "COLOR_SENT",			TYPE_ULONG,	&(current_colors[COLOR_SENT]) },
+	{ 0, 0, 0}
 };
 
 unsigned long Sent = 0, Recv = 0, TotalSent = 0, TotalRecv = 0, MaxSent = 0, MaxRecv = 0;
@@ -106,6 +122,7 @@ void saveconfig(void)
 {
 	FILE *f;
 	char *tmppath = INIDIR, *inidir, *inipath, *home = dw_user_dir();
+	int x = 0;
 
 	update_pos();
 
@@ -146,7 +163,7 @@ void saveconfig(void)
 		}
 		if(f==NULL)
 		{
-			dw_messagebox("Gateway", DW_MB_ERROR | DW_MB_OK, "Could not save settings. Inipath = \"%s\"", inipath);
+			dw_messagebox(APP_NAME, DW_MB_ERROR | DW_MB_OK, "Could not save settings. Inipath = \"%s\"", inipath);
 			free(inipath);
 			free(inidir);
 			return;
@@ -156,22 +173,60 @@ void saveconfig(void)
 	free(inipath);
 	free(inidir);
 
-	fprintf(f, "WIDTH=%d\n", (int)width);
-	fprintf(f, "HEIGHT=%d\n", (int)height);
-	fprintf(f, "X=%d\n", (int)x);
-	fprintf(f, "Y=%d\n", (int)y);
+	/* Loop through all saveable settings */
+	while(Config[x].type)
+	{
+		switch(Config[x].type)
+		{
+			/* Handle saving integers */
+			case TYPE_INT:
+			{
+				int *var = (int *)Config[x].data;
+				
+				fprintf(f, "%s=%d\n", Config[x].name, *var);
+				break;
+			}
+			/* Handle saving unsigned long integers */
+			case TYPE_ULONG:
+			{
+				unsigned long *var = (unsigned long *)Config[x].data;
+				
+				fprintf(f, "%s=%lu\n", Config[x].name, *var);
+				break;
+			}
+			/* Handle saving strings */
+			case TYPE_STRING:
+			{
+				char **str = (char **)Config[x].data;
+				
+				fprintf(f, "%s=%s\n", Config[x].name, *str);
+				break;
+			}
+			/* Handle saving floating point */
+			case TYPE_FLOAT:
+			{
+				float *var = (float *)Config[x].data;
+				
+				fprintf(f, "%s=%f\n", Config[x].name, *var);
+				break;
+			}
+		}
+		x++;
+	}
 
 	fclose(f);
 }
 
+#define INI_BUFFER 256
+
 /* Generic function to parse information from a config file */
 void cc_getline(FILE *f, char *entry, char *entrydata)
 {
-	char in[256];
+	char in[INI_BUFFER];
 	int z;
 
-	memset(in, 0, 256);
-	fgets(in, 255, f);
+	memset(in, 0, INI_BUFFER);
+	fgets(in, INI_BUFFER - 1, f);
 
 	if(in[strlen(in)-1] == '\n')
 		in[strlen(in)-1] = 0;
@@ -197,7 +252,7 @@ void cc_getline(FILE *f, char *entry, char *entrydata)
 void loadconfig(void)
 {
 	char *tmppath = INIDIR, *inipath, *home = dw_user_dir();
-	char entry[256], entrydata[256];
+	char entry[INI_BUFFER], entrydata[INI_BUFFER];
 	FILE *f;
 
 	if(strcmp(INIDIR, ".") == 0)
@@ -223,28 +278,67 @@ void loadconfig(void)
 
 	free(inipath);
 
+	/* If we successfully opened the ini file */
 	if(f)
 	{
+		/* Loop through the file */
 		while(!feof(f))
 		{
+			int x = 0;
+			
 			cc_getline(f, entry, entrydata);
 
-			if(strcasecmp(entry, "width")==0)
-				width = atoi(entrydata);
-			if(strcasecmp(entry, "height")==0)
-				height = atoi(entrydata);
-			if(strcasecmp(entry, "x")==0)
-				x = atoi(entrydata);
-			if(strcasecmp(entry, "y")==0)
-				y = atoi(entrydata);
-
+			/* Cycle through the possible settings */
+			while(Config[x].type)
+			{
+				/* If this line has a setting we are looking for */
+				if(strcasecmp(entry, Config[x].name)==0)
+				{
+					switch(Config[x].type)
+					{
+						/* Load an integer setting */
+						case TYPE_INT:
+						{
+							int *var = (int *)Config[x].data;
+							
+							*var = atoi(entrydata);
+							break;
+						}
+						/* Load an unsigned long integer setting */
+						case TYPE_ULONG:
+						{
+							unsigned long *var = (unsigned long *)Config[x].data;
+							
+							sscanf(entrydata, "%lu", var);
+							break;
+						}
+						/* Load an string setting */
+						case TYPE_STRING:
+						{
+							char **str = (char **)Config[x].data;
+							
+							*str = strdup(entrydata);
+							break;
+						}
+						/* Load an floating point setting */
+						case TYPE_FLOAT:
+						{
+							float *var = (float *)Config[x].data;
+							
+							*var = atof(entrydata);
+							break;
+						}
+					}
+				}
+				x++;
+			}
 		}
 		fclose(f);
 	}
 }
 
 /* Creates pull down or popup menu */
-void DWSIGNAL menu_create(HWND handle, HWND hwnd)
+int DWSIGNAL display_menu(HWND handle, HWND hwnd)
 {
 	HMENUI hwndMenu;
 	HWND menuitem;
@@ -252,17 +346,18 @@ void DWSIGNAL menu_create(HWND handle, HWND hwnd)
 
 	hwndMenu = dw_menu_new(0L);
 
-	menuitem = dw_menu_append_item(hwndMenu, "Properties", IDM_PROP, 0L, TRUE, FALSE, DW_NOMENU);
-	dw_signal_connect(menuitem, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(display_menu), (void *)IDM_PROP);
+	menuitem = dw_menu_append_item(hwndMenu, "Properties", DW_MENU_POPUP, 0L, TRUE, FALSE, DW_NOMENU);
+	dw_signal_connect(menuitem, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(display_properties), NULL);
 
-	menuitem = dw_menu_append_item(hwndMenu, "~Minimize", IDM_MINIMIZE, 0L, TRUE, FALSE, DW_NOMENU);
-	dw_signal_connect(menuitem, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(display_menu), (void *)IDM_MINIMIZE);
+	menuitem = dw_menu_append_item(hwndMenu, "~Minimize", DW_MENU_POPUP, 0L, TRUE, FALSE, DW_NOMENU);
+	dw_signal_connect(menuitem, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(display_minimize), NULL);
 	dw_menu_append_item(hwndMenu, "", 0L, 0L, TRUE, FALSE, 0L);
-	menuitem = dw_menu_append_item(hwndMenu, "E~xit", IDM_EXIT, 0L, TRUE, FALSE, DW_NOMENU);
-	dw_signal_connect(menuitem, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(display_menu), (void *)IDM_EXIT);
+	menuitem = dw_menu_append_item(hwndMenu, "E~xit", DW_MENU_POPUP, 0L, TRUE, FALSE, DW_NOMENU);
+	dw_signal_connect(menuitem, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(display_exit), NULL);
 
 	dw_pointer_query_pos(&px, &py);
 	dw_menu_popup(&hwndMenu, hwnd, px, py);
+	return TRUE;
 }
 
 /* This function creates the display windows */
@@ -273,7 +368,7 @@ void display_create(void)
 
 	hwndFrame = dw_window_new(HWND_DESKTOP, "Control Center", flStyle);
 
-	hwndHbox = dw_box_new(BOXVERT, 0);
+	hwndHbox = dw_box_new(DW_VERT, 0);
 
 	dw_box_pack_start(hwndFrame, hwndHbox, 0, 0, TRUE, TRUE, 0);
 
@@ -300,7 +395,7 @@ void display_create(void)
 }
 
 /* This function continually updates the display windows */
-void DWSIGNAL display_update(void)
+int DWSIGNAL display_update(void)
 {
 	srand(time(NULL));
 
@@ -374,34 +469,142 @@ int is_window(HWND hwnd, int which)
 	return FALSE;
 }
 
-void DWSIGNAL delete_event(HWND hwnd, void *data)
+int DWSIGNAL delete_event(HWND hwnd, void *data)
 {
 	display_destroy();
 	exit(0);
+	return TRUE;
 }
 
 /* Context menus */
-void DWSIGNAL display_menu(HWND hwnd, void *data)
+int DWSIGNAL display_exit(HWND hwnd, void *data)
 {
-	switch(DW_POINTER_TO_INT(data))
-	{
-	case IDM_EXIT:
-		{
-			display_active = FALSE;
-			update_pos();
-			saveconfig();
-			dw_main_quit();
-		}
-		break;
-	case IDM_PROP:
-		break;
+	display_active = FALSE;
+	update_pos();
+	saveconfig();
+	dw_main_quit();
+	return TRUE;
+}
 
-	case IDM_MINIMIZE:
-		{
-			dw_window_minimize(hwndFrame);
-		}
-		break;
+int DWSIGNAL display_minimize(HWND hwnd, void *data)
+{
+	dw_window_minimize(hwndFrame);
+	return TRUE;
+}
+
+/* Called when the color swatch needs to be redrawn */
+int DWSIGNAL color_expose(HWND hwnd, DWExpose *exp, void *data)
+{
+	int color = DW_POINTER_TO_INT(data);
+	
+	dw_color_foreground_set(current_colors[color]);
+	dw_draw_rect(hwnd, 0, DW_DRAW_FILL, exp->x, exp->y, exp->width, exp->height);
+	
+	return TRUE;
+}
+
+/* Handle changing the color of an item */
+int DWSIGNAL color_click(HWND hwnd, void *data)
+{
+	int color = DW_POINTER_TO_INT(data);
+	unsigned long thiswidth, thisheight, newcol;
+
+	newcol = dw_color_choose(current_colors[color]);
+	
+	if(newcol != current_colors[color])
+	{
+		current_colors[color] = newcol;
+
+		dw_window_get_pos_size(hwnd, NULL, NULL, &thiswidth, &thisheight);
+		dw_color_foreground_set(newcol);
+		dw_draw_rect(hwnd, 0, DW_DRAW_FILL, 0, 0, thiswidth, thisheight);
 	}
+	return TRUE;
+}
+
+/* Handle changing the display font */
+int DWSIGNAL font_click(HWND hwnd, void *data)
+{
+	char *oldfont = current_font;
+	char *newfont = dw_font_choose(current_font);
+	
+	if(newfont)
+	{
+		current_font = strdup(newfont);
+
+		/* Update the look and text of the button */
+		dw_window_set_font(hwnd, newfont);
+		dw_window_set_text(hwnd, newfont);
+
+		/* Free the old fonts */
+		free(oldfont);
+		dw_free(newfont);
+	}
+	return TRUE;
+}
+
+/* Handle properties dialog closing */
+int DWSIGNAL properties_delete(HWND hwnd, void *data)
+{
+	in_properties = 0;
+	return TRUE;
+}
+
+/* Create the properties dialog */
+int DWSIGNAL display_properties(HWND hwnd, void *data)
+{
+	HWND notebook, vbox, hbox, tmp;
+	ULONG page, flStyle = DW_FCF_TITLEBAR | DW_FCF_SIZEBORDER | DW_FCF_CLOSEBUTTON | DW_FCF_SYSMENU;
+	int x;
+
+	/* If the window is already open, show it instead */
+	if(in_properties)
+	{
+		dw_window_show(in_properties);
+		return TRUE;
+	}
+
+	/* Create a new properties dialog */
+	in_properties = dw_window_new(DW_DESKTOP, "Properties", flStyle);
+	
+	notebook = dw_notebook_new(0, TRUE);
+	dw_box_pack_start(in_properties, notebook, 0, 0, TRUE, TRUE, 0);
+
+	/* Create the noteboook */
+	vbox = dw_scrollbox_new(DW_VERT, 5);
+	page = dw_notebook_page_new(notebook, 0, TRUE);
+	dw_notebook_pack(notebook, page, vbox);
+	dw_notebook_page_set_text(notebook, page, "Appearance");
+
+	/* Current Font */
+	hbox = dw_box_new(DW_HORZ, 0);
+	dw_box_pack_start(vbox, hbox, 0, 0, FALSE, FALSE, 0);
+	tmp = dw_text_new("Display Font:", 0);
+	dw_box_pack_start(hbox, tmp, -1, -1, FALSE, FALSE, 2);
+	tmp = dw_button_new(current_font, 0);
+	dw_window_set_font(tmp, current_font);
+	dw_signal_connect(tmp, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(font_click), NULL);
+	dw_box_pack_start(hbox, tmp, -1, -1, FALSE, FALSE, 2);
+
+	/* Create displays for all the colors */
+	for(x=0;x<COLOR_MAX;x++)
+	{
+		hbox = dw_box_new(DW_HORZ, 0);
+		dw_box_pack_start(vbox, hbox, 0, 0, FALSE, FALSE, 0);
+		tmp = dw_render_new(0);
+		dw_window_set_pointer(tmp, DW_POINTER_ARROW);
+		dw_signal_connect(tmp, DW_SIGNAL_EXPOSE, DW_SIGNAL_FUNC(color_expose), DW_INT_TO_POINTER(x));
+		dw_signal_connect(tmp, DW_SIGNAL_BUTTON_PRESS, DW_SIGNAL_FUNC(color_click), DW_INT_TO_POINTER(x));
+		dw_box_pack_start(hbox, tmp, 40, 25, FALSE, FALSE, 2);
+		tmp = dw_text_new(color_names[x], 0);
+		dw_box_pack_start(hbox, tmp, -1, -1, FALSE, FALSE, 2);
+	}
+
+	dw_signal_connect(in_properties, DW_SIGNAL_DELETE, DW_SIGNAL_FUNC(properties_delete), NULL);
+
+	dw_window_set_size(in_properties, 300, 400);
+	dw_window_show(in_properties);
+	return TRUE;
 }
 
 /* This gets called when the graph resizes */
@@ -467,7 +670,7 @@ int DWSIGNAL display_button_press(HWND hwnd, int x, int y, int button, void *dat
 		dw_window_capture(hwnd);
 	}
 	else if (button == 2)
-		menu_create(0, hwnd);
+		display_menu(0, hwnd);
 	return TRUE;
 }
 
@@ -755,7 +958,7 @@ void text_draw(struct _instance *inst)
 			height = DW_PIXMAP_HEIGHT(hPixmap);
 
 			/* Clear the graph area */
-			dw_color_foreground_set(colors[COLOR_THUMB]);
+			dw_color_foreground_set(current_colors[COLOR_THUMB]);
 			dw_draw_rect(0, hPixmap, TRUE, 0, 0, width, height);
 
 			draw_box(hPixmap, 0, 0, width, height, 0, DW_RGB(0,0,0), DW_RGB(0,0,0), DW_RGB(255,255,255), DW_RGB(255,255,255), 0, 0);
@@ -821,7 +1024,7 @@ void bar_draw(struct _instance *inst)
 
 		barwidth = (int)(ratio * ((float)width));
 
-		dw_color_foreground_set(colors[COLOR_THUMB]);
+		dw_color_foreground_set(current_colors[COLOR_THUMB]);
 		dw_draw_rect(0, hPixmap, TRUE, 0, 0, width, height);
 
 		draw_box(hPixmap, 0, 0, width, height, 0, DW_RGB(0,0,0), DW_RGB(0,0,0), DW_RGB(255,255,255), DW_RGB(255,255,255), 0, 0);
@@ -983,7 +1186,7 @@ void net_draw(struct _instance *inst)
 		height = DW_PIXMAP_HEIGHT(hPixmap);
 
 		/* Draw window border */
-		dw_color_foreground_set(colors[COLOR_THUMB]);
+		dw_color_foreground_set(current_colors[COLOR_THUMB]);
 		dw_draw_rect(0, hPixmap, TRUE, 0, 0, width, height);
 		dw_color_foreground_set(DW_RGB(0,0,0));
 		dw_draw_rect(0, hPixmap, TRUE, 2, 2, width - 4, height - 4);
@@ -1273,8 +1476,7 @@ void init_drives(void)
 
 int main(int argc, char *argv[])
 {
-	current_colors = colors;
-	current_font = fonts[0];
+	current_font = strdup(DEFFONT);
 
 	loadconfig();
 
