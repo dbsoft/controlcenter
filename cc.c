@@ -338,7 +338,7 @@ void loadconfig(void)
 }
 
 /* Creates pull down or popup menu */
-int DWSIGNAL display_menu(HWND handle, HWND hwnd)
+int DWSIGNAL display_menu(HWND hwnd, void *data)
 {
 	HMENUI hwndMenu;
 	HWND menuitem;
@@ -504,7 +504,7 @@ int DWSIGNAL color_expose(HWND hwnd, DWExpose *exp, void *data)
 }
 
 /* Handle changing the color of an item */
-int DWSIGNAL color_click(HWND hwnd, void *data)
+int DWSIGNAL color_click(HWND hwnd, int x, int y, int buttonmask, void *data)
 {
 	int color = DW_POINTER_TO_INT(data);
 	unsigned long thiswidth, thisheight, newcol;
@@ -547,7 +547,7 @@ int DWSIGNAL font_click(HWND hwnd, void *data)
 int DWSIGNAL properties_delete(HWND hwnd, void *data)
 {
 	in_properties = 0;
-	return TRUE;
+	return FALSE;
 }
 
 /* Create the properties dialog */
