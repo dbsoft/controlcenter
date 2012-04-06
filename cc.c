@@ -421,6 +421,7 @@ int DWSIGNAL display_update(void)
 
 	}
 	display_destroy();
+	return FALSE;
 }
 
 void display_destroy_monitor(int entry)
