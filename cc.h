@@ -112,7 +112,7 @@ char *color_names[] = {
 	"Lowlight Color",
 	"Border Color",
 	"Thumb Color",
-	"Text Color",
+	"Graph Color",
 	"Average Color",
 	"Grid Color",
 	"Receive Color",

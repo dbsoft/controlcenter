@@ -510,7 +510,7 @@ int DWSIGNAL color_click(HWND hwnd, int x, int y, int buttonmask, void *data)
 	unsigned long thiswidth, thisheight, newcol;
 
 	newcol = dw_color_choose(current_colors[color]);
-	
+
 	if(newcol != current_colors[color])
 	{
 		current_colors[color] = newcol;
@@ -530,11 +530,23 @@ int DWSIGNAL font_click(HWND hwnd, void *data)
 	
 	if(newfont)
 	{
+		int m = 0;
+		
 		current_font = strdup(newfont);
 
 		/* Update the look and text of the button */
 		dw_window_set_font(hwnd, newfont);
 		dw_window_set_text(hwnd, newfont);
+
+		/* Update the fonts on the active windows */
+		while(gList[m].Name)
+		{
+			if(gList[m].hwndDraw && gList[m].hwndDraw[0])
+			{
+				dw_window_set_font(gList[m].hwndDraw[0], newfont);
+			}
+			m++;
+		}
 
 		/* Free the old fonts */
 		free(oldfont);
@@ -546,6 +558,7 @@ int DWSIGNAL font_click(HWND hwnd, void *data)
 /* Handle properties dialog closing */
 int DWSIGNAL properties_delete(HWND hwnd, void *data)
 {
+	dw_window_destroy(in_properties);
 	in_properties = 0;
 	return FALSE;
 }
@@ -580,7 +593,8 @@ int DWSIGNAL display_properties(HWND hwnd, void *data)
 	hbox = dw_box_new(DW_HORZ, 0);
 	dw_box_pack_start(vbox, hbox, 0, 0, FALSE, FALSE, 0);
 	tmp = dw_text_new("Display Font:", 0);
-	dw_box_pack_start(hbox, tmp, -1, -1, FALSE, FALSE, 2);
+	dw_window_set_style(tmp, DW_DT_VCENTER, DW_DT_VCENTER);
+	dw_box_pack_start(hbox, tmp, -1, -1, FALSE, TRUE, 2);
 	tmp = dw_button_new(current_font, 0);
 	dw_window_set_font(tmp, current_font);
 	dw_signal_connect(tmp, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(font_click), NULL);
@@ -597,7 +611,8 @@ int DWSIGNAL display_properties(HWND hwnd, void *data)
 		dw_signal_connect(tmp, DW_SIGNAL_BUTTON_PRESS, DW_SIGNAL_FUNC(color_click), DW_INT_TO_POINTER(x));
 		dw_box_pack_start(hbox, tmp, 40, 25, FALSE, FALSE, 2);
 		tmp = dw_text_new(color_names[x], 0);
-		dw_box_pack_start(hbox, tmp, -1, -1, FALSE, FALSE, 2);
+		dw_window_set_style(tmp, DW_DT_VCENTER, DW_DT_VCENTER);
+		dw_box_pack_start(hbox, tmp, -1, -1, FALSE, TRUE, 2);
 	}
 
 	dw_signal_connect(in_properties, DW_SIGNAL_DELETE, DW_SIGNAL_FUNC(properties_delete), NULL);
@@ -670,7 +685,7 @@ int DWSIGNAL display_button_press(HWND hwnd, int x, int y, int button, void *dat
 		dw_window_capture(hwnd);
 	}
 	else if (button == 2)
-		display_menu(0, hwnd);
+		display_menu(hwnd, 0);
 	return TRUE;
 }
 
