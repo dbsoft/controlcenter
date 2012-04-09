@@ -120,49 +120,64 @@ void restore_pos(void)
 /* Write the cc.ini file with all of the current settings */
 void saveconfig(void)
 {
-	FILE *f;
-	char *tmppath = INIDIR, *inidir, *inipath, *home = dw_user_dir();
+	char *tmppath = INIDIR, *inidir, *inipath, *home = dw_user_dir(), *inifile = __TARGET__ ".ini";
 	int x = 0;
+	FILE *f;
 
 	update_pos();
 
 	if(strcmp(INIDIR, ".") == 0)
 	{
-		inipath = strdup(__TARGET__ ".ini");
+		inipath = strdup(inifile);
 		inidir = strdup(INIDIR);
 	}
 	else
 	{
+		/* Need space for the filename, directory separator and NULL */
+		int extra = strlen(inifile) + 2;
+        
+		/* If the path is in the home directory... */
 		if(home && tmppath[0] == '~')
 		{
-			inipath = malloc(strlen(home) + strlen(INIDIR) + 14);
-			inidir = malloc(strlen(home) + strlen(INIDIR));
+			/* Fill in both with the retrieved home directory */
+			inipath = calloc(strlen(home) + strlen(INIDIR) + extra, 1);
+			inidir = calloc(strlen(home) + strlen(INIDIR) + 1, 1);
 			strcpy(inipath, home);
 			strcpy(inidir, home);
+			/* Append everything after the tilde */
 			strcat(inipath, &tmppath[1]);
 			strcat(inidir, &tmppath[1]);
 		}
 		else
 		{
-			inipath = malloc(strlen(INIDIR) + 14);
+			/* Otherwise just copy the entire directory */
+			inipath = calloc(strlen(INIDIR) + extra, 1);
 			strcat(inipath, INIDIR);
 			inidir = strdup(INIDIR);
 		}
+		/* Add the separator and filename */
 		strcat(inipath, DIRSEP);
 		strcat(inipath, __TARGET__ ".ini");
 	}
 
+	/* Try to open the file for writing */
 	f=fopen(inipath, FOPEN_WRITE_TEXT);
 
+	/* If we couldn't open it... */
 	if(f==NULL)
 	{
+		/*  If the ini direcotry isn't the current directory... */
 		if(strcmp(INIDIR, ".") != 0)
 		{
+			/* Try to create the directory */
 			makedir(inidir);
+			/* Then try to open it again */
 			f=fopen(inipath, FOPEN_WRITE_TEXT);
 		}
+		/* If it still failed... */
 		if(f==NULL)
 		{
+			/* Show an error message */
 			dw_messagebox(APP_NAME, DW_MB_ERROR | DW_MB_OK, "Could not save settings. Inipath = \"%s\"", inipath);
 			free(inipath);
 			free(inidir);
@@ -170,6 +185,7 @@ void saveconfig(void)
 		}
 	}
 
+	/* Free the temporary memory */
 	free(inipath);
 	free(inidir);
 
@@ -182,15 +198,23 @@ void saveconfig(void)
 			case TYPE_INT:
 			{
 				int *var = (int *)Config[x].data;
-				
+
 				fprintf(f, "%s=%d\n", Config[x].name, *var);
+				break;
+			}
+			/* Handle saving booleans */
+			case TYPE_BOOLEAN:
+			{
+				int *var = (int *)Config[x].data;
+
+				fprintf(f, "%s=%s\n", Config[x].name, *var ? "TRUE" : "FALSE");
 				break;
 			}
 			/* Handle saving unsigned long integers */
 			case TYPE_ULONG:
 			{
 				unsigned long *var = (unsigned long *)Config[x].data;
-				
+
 				fprintf(f, "%s=%lu\n", Config[x].name, *var);
 				break;
 			}
@@ -198,7 +222,7 @@ void saveconfig(void)
 			case TYPE_STRING:
 			{
 				char **str = (char **)Config[x].data;
-				
+
 				fprintf(f, "%s=%s\n", Config[x].name, *str);
 				break;
 			}
@@ -206,7 +230,7 @@ void saveconfig(void)
 			case TYPE_FLOAT:
 			{
 				float *var = (float *)Config[x].data;
-				
+
 				fprintf(f, "%s=%f\n", Config[x].name, *var);
 				break;
 			}
@@ -222,66 +246,79 @@ void saveconfig(void)
 /* Generic function to parse information from a config file */
 void ini_getline(FILE *f, char *entry, char *entrydata)
 {
-	char in[INI_BUFFER];
-	int z;
+	/* Allocate zeroed buffer from the stack */
+	char in[INI_BUFFER] = { 0 };
 
-	memset(in, 0, INI_BUFFER);
-
+	/* Try to read a line into the buffer */
 	if(fgets(in, INI_BUFFER - 1, f))
 	{
 		int len = strlen(in);
-	   
+
+		/* Strip off any trailing newlines */
 		if(len > 0 && in[len-1] == '\n')
 			in[len-1] = 0;
 
+		/* Skip over comment lines starting with # */
 		if(in[0] != '#')
 		{
-			len = strlen(in);
-	      
-			for(z=0;z<len;z++)
+			/* Locate = in the line */
+			char *equalsign = strchr(in, '=');
+
+			/* If the = was found... */
+			if(equalsign)
 			{
-				if(in[z] == '=')
-				{
-					in[z] = 0;
-					strcpy(entry, in);
-					strcpy(entrydata, &in[z+1]);
-					return;
-				}
+				/* Replace = with NULL terminator */
+				*equalsign = 0;
+				/* Copy before the = into entry */
+				strcpy(entry, in);
+				/* And after the = into entrydata */
+				strcpy(entrydata, ++equalsign);
+				return;
 			}
 		}
 	}
-	entry[0] = 0;
-	entrydata[0] = 0;
+	/* NULL terminate both variables */
+	entrydata[0] = entry[0] = 0;
 }
 
 /* Load the cc.ini file from disk setting all the necessary flags */
 void loadconfig(void)
 {
-	char *tmppath = INIDIR, *inipath, *home = dw_user_dir();
+	char *tmppath = INIDIR, *inipath, *home = dw_user_dir(), *inifile = __TARGET__ ".ini";
 	char entry[INI_BUFFER], entrydata[INI_BUFFER];
 	FILE *f;
 
 	if(strcmp(INIDIR, ".") == 0)
-		inipath = strdup(__TARGET__ ".ini");
+		inipath = strdup(inifile);
 	else
 	{
+		/* Need space for the filename, directory separator and NULL */
+		int extra = strlen(inifile) + 2;
+
+		/* If the path is in the home directory... */
 		if(home && tmppath[0] == '~')
 		{
-			inipath = malloc(strlen(home) + strlen(INIDIR) + 14);
+			/* Fill it in with the retrieved home directory */
+			inipath = calloc(strlen(home) + strlen(INIDIR) + extra, 1);
 			strcpy(inipath, home);
+			/* Append everything after the tilde */
 			strcat(inipath, &tmppath[1]);
 		}
 		else
 		{
-			inipath = malloc(strlen(INIDIR) + 14);
-			strcat(inipath, INIDIR);
+			/* Otherwise just copy the entire directory */
+			inipath = calloc(strlen(INIDIR) + extra, 1);
+			strcpy(inipath, INIDIR);
 		}
+		/* Add the separator and filename */
 		strcat(inipath, DIRSEP);
-		strcat(inipath, __TARGET__ ".ini");
+		strcat(inipath, inifile);
 	}
 
+	/* Try to open the file for reading */
 	f = fopen(inipath, FOPEN_READ_TEXT);
 
+	/* Free the temporary memory */
 	free(inipath);
 
 	/* If we successfully opened the ini file */
@@ -306,15 +343,26 @@ void loadconfig(void)
 						case TYPE_INT:
 						{
 							int *var = (int *)Config[x].data;
-							
+
 							*var = atoi(entrydata);
+							break;
+						}
+						/* Load an boolean setting */
+						case TYPE_BOOLEAN:
+						{
+							int *var = (int *)Config[x].data;
+
+							if(strcasecmp(entrydata, "true")==0)
+								*var = TRUE;
+							else
+								*var = FALSE;
 							break;
 						}
 						/* Load an unsigned long integer setting */
 						case TYPE_ULONG:
 						{
 							unsigned long *var = (unsigned long *)Config[x].data;
-							
+
 							sscanf(entrydata, "%lu", var);
 							break;
 						}
@@ -322,7 +370,7 @@ void loadconfig(void)
 						case TYPE_STRING:
 						{
 							char **str = (char **)Config[x].data;
-							
+
 							*str = strdup(entrydata);
 							break;
 						}
@@ -330,7 +378,7 @@ void loadconfig(void)
 						case TYPE_FLOAT:
 						{
 							float *var = (float *)Config[x].data;
-							
+
 							*var = atof(entrydata);
 							break;
 						}

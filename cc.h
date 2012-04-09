@@ -83,6 +83,7 @@ enum type_list {
 	TYPE_INT,
 	TYPE_ULONG,
 	TYPE_FLOAT,
+	TYPE_BOOLEAN,
 	TYPE_STRING
 };
 
