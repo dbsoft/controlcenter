@@ -85,7 +85,7 @@ SaveConfig Config[] =
 	{ "COLOR_GRID",			TYPE_ULONG,	&(current_colors[COLOR_GRID]) },
 	{ "COLOR_RECV",			TYPE_ULONG,	&(current_colors[COLOR_RECV]) },
 	{ "COLOR_SENT",			TYPE_ULONG,	&(current_colors[COLOR_SENT]) },
-	{ 0, 0, 0}
+	{ "", 0, 0}
 };
 
 unsigned long Sent = 0, Recv = 0, TotalSent = 0, TotalRecv = 0, MaxSent = 0, MaxRecv = 0;
@@ -226,26 +226,32 @@ void ini_getline(FILE *f, char *entry, char *entrydata)
 	int z;
 
 	memset(in, 0, INI_BUFFER);
-	fgets(in, INI_BUFFER - 1, f);
 
-	if(in[strlen(in)-1] == '\n')
-		in[strlen(in)-1] = 0;
-
-	if(in[0] != '#')
+	if(fgets(in, INI_BUFFER - 1, f))
 	{
-		for(z=0;z<strlen(in);z++)
+		int len = strlen(in);
+	   
+		if(len > 0 && in[len-1] == '\n')
+			in[len-1] = 0;
+
+		if(in[0] != '#')
 		{
-			if(in[z] == '=')
+			len = strlen(in);
+	      
+			for(z=0;z<len;z++)
 			{
-				in[z] = 0;
-				strcpy(entry, in);
-				strcpy(entrydata, &in[z+1]);
-				return;
+				if(in[z] == '=')
+				{
+					in[z] = 0;
+					strcpy(entry, in);
+					strcpy(entrydata, &in[z+1]);
+					return;
+				}
 			}
 		}
 	}
-	strcpy(entry, "");
-	strcpy(entrydata, "");
+	entry[0] = 0;
+	entrydata[0] = 0;
 }
 
 /* Load the cc.ini file from disk setting all the necessary flags */

@@ -77,21 +77,21 @@ int Get_Load(double *Load)
 		char buf[1024];
 		int user, nice, sys, idle, used, total;
 
-		fgets(buf, 1024, fp);
+		if(fgets(buf, 1024, fp))
+		{
+		   sscanf(buf, "cpu %d %d %d %d", &user, &nice, &sys, &idle);
 
-		sscanf(buf, "cpu %d %d %d %d", &user, &nice, &sys, &idle);
+		   used = (user+nice+sys);
+		   total = used + idle;
 
-		used = (user+nice+sys);
-		total = used + idle;
+		   if(lasttotal && (total - lasttotal))
+			   lastload = *Load = (double)(used-lastused)/(total-lasttotal);
+		   else
+			   *Load = lastload;
 
-		if(lasttotal && (total - lasttotal))
-			lastload = *Load = (double)(used-lastused)/(total-lasttotal);
-		else
-			*Load = lastload;
-
-		lastused = used;
-		lasttotal = total;
-
+		   lastused = used;
+		   lasttotal = total;
+      }
 		fclose(fp);
 	}
 #elif defined(__FreeBSD__)
@@ -203,41 +203,42 @@ int Get_Net(unsigned long *Sent, unsigned long *Recv, unsigned long *TotalSent, 
 			char *ifacename;
 			int packets, bytes, errs, drop, fifo, frame, compressed, multicast, sbytes, serrs;
 
-			fgets(buf, 1024, fp);
-
-			tmp = buf;
-
-			/* Find the first interface entry */
-			while(*tmp == ' ')
-				tmp++;
-			/* Save the start of the name */
-			ifacename = tmp;
-			/* Find the end of the interface name */
-			while(*tmp && *tmp != ':')
-				tmp++;
-
-			/* Looks like we found something! */
-			if(*tmp == ':' && if_unit < 16)
+			if(fgets(buf, 1024, fp))
 			{
-				/* Terminate the interface name */
-				*tmp = 0;
+			   tmp = buf;
 
-				tmp++;
+			   /* Find the first interface entry */
+			   while(*tmp == ' ')
+				   tmp++;
+			   /* Save the start of the name */
+			   ifacename = tmp;
+			   /* Find the end of the interface name */
+			   while(*tmp && *tmp != ':')
+				   tmp++;
 
-				sscanf(tmp, "%d %d %d %d %d %d %d %d %d %d", &bytes, &packets, &errs, &drop, &fifo, &frame,
-					   &compressed, &multicast, &sbytes, &serrs);
+			   /* Looks like we found something! */
+			   if(*tmp == ':' && if_unit < 16)
+			   {
+				   /* Terminate the interface name */
+				   *tmp = 0;
 
-				if(!firsttime)
-				{
-					*Recv += bytes - ulTotalIn[if_unit];
-					*Sent += sbytes - ulTotalOut[if_unit];
-				}
-				ulTotalOut[if_unit] = sbytes;
-				*TotalSent += sbytes;
-				ulTotalIn[if_unit] = bytes;
-				*TotalRecv += bytes;
-				if_unit++;
-			}
+				   tmp++;
+
+				   sscanf(tmp, "%d %d %d %d %d %d %d %d %d %d", &bytes, &packets, &errs, &drop, &fifo, &frame,
+					      &compressed, &multicast, &sbytes, &serrs);
+
+				   if(!firsttime)
+				   {
+					   *Recv += bytes - ulTotalIn[if_unit];
+					   *Sent += sbytes - ulTotalOut[if_unit];
+				   }
+				   ulTotalOut[if_unit] = sbytes;
+				   *TotalSent += sbytes;
+				   ulTotalIn[if_unit] = bytes;
+				   *TotalRecv += bytes;
+				   if_unit++;
+			   }
+		   }
 		}
 		firsttime = 0;
 		fclose(fp);
