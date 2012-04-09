@@ -1,9 +1,5 @@
 #define MAIN_FRAME    155
 
-#define IDM_EXIT      200
-#define IDM_MINIMIZE  205
-#define IDM_PROP      231
-
 #define APP_NAME      "Control Center"
 
 #ifndef RESOURCE_IDS_ONLY

@@ -117,7 +117,7 @@ void restore_pos(void)
 	dw_window_set_pos_size(hwndFrame, x, y, width, height);
 }
 
-/* Write the logview.ini file with all of the current settings */
+/* Write the cc.ini file with all of the current settings */
 void saveconfig(void)
 {
 	FILE *f;
@@ -128,7 +128,7 @@ void saveconfig(void)
 
 	if(strcmp(INIDIR, ".") == 0)
 	{
-		inipath = strdup("cc.ini");
+		inipath = strdup(__TARGET__ ".ini");
 		inidir = strdup(INIDIR);
 	}
 	else
@@ -149,7 +149,7 @@ void saveconfig(void)
 			inidir = strdup(INIDIR);
 		}
 		strcat(inipath, DIRSEP);
-		strcat(inipath, "cc.ini");
+		strcat(inipath, __TARGET__ ".ini");
 	}
 
 	f=fopen(inipath, FOPEN_WRITE_TEXT);
@@ -220,7 +220,7 @@ void saveconfig(void)
 #define INI_BUFFER 256
 
 /* Generic function to parse information from a config file */
-void cc_getline(FILE *f, char *entry, char *entrydata)
+void ini_getline(FILE *f, char *entry, char *entrydata)
 {
 	char in[INI_BUFFER];
 	int z;
@@ -248,7 +248,7 @@ void cc_getline(FILE *f, char *entry, char *entrydata)
 	strcpy(entrydata, "");
 }
 
-/* Load the logview.ini file from disk setting all the necessary flags */
+/* Load the cc.ini file from disk setting all the necessary flags */
 void loadconfig(void)
 {
 	char *tmppath = INIDIR, *inipath, *home = dw_user_dir();
@@ -256,7 +256,7 @@ void loadconfig(void)
 	FILE *f;
 
 	if(strcmp(INIDIR, ".") == 0)
-		inipath = strdup("cc.ini");
+		inipath = strdup(__TARGET__ ".ini");
 	else
 	{
 		if(home && tmppath[0] == '~')
@@ -271,7 +271,7 @@ void loadconfig(void)
 			strcat(inipath, INIDIR);
 		}
 		strcat(inipath, DIRSEP);
-		strcat(inipath, "cc.ini");
+		strcat(inipath, __TARGET__ ".ini");
 	}
 
 	f = fopen(inipath, FOPEN_READ_TEXT);
@@ -286,7 +286,7 @@ void loadconfig(void)
 		{
 			int x = 0;
 			
-			cc_getline(f, entry, entrydata);
+			ini_getline(f, entry, entrydata);
 
 			/* Cycle through the possible settings */
 			while(Config[x].type)
