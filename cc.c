@@ -659,7 +659,7 @@ int DWSIGNAL display_properties(HWND hwnd, void *data)
 	for(x=0;x<COLOR_MAX;x++)
 	{
 		hbox = dw_box_new(DW_HORZ, 0);
-		dw_box_pack_start(vbox, hbox, 0, 0, FALSE, FALSE, 0);
+		dw_box_pack_start(vbox, hbox, 0, 0, TRUE, FALSE, 0);
 		tmp = dw_render_new(0);
 		dw_window_set_pointer(tmp, DW_POINTER_ARROW);
 		dw_signal_connect(tmp, DW_SIGNAL_EXPOSE, DW_SIGNAL_FUNC(color_expose), DW_INT_TO_POINTER(x));
@@ -667,7 +667,7 @@ int DWSIGNAL display_properties(HWND hwnd, void *data)
 		dw_box_pack_start(hbox, tmp, 40, 25, FALSE, FALSE, 2);
 		tmp = dw_text_new(color_names[x], 0);
 		dw_window_set_style(tmp, DW_DT_VCENTER, DW_DT_VCENTER);
-		dw_box_pack_start(hbox, tmp, -1, -1, FALSE, TRUE, 2);
+		dw_box_pack_start(hbox, tmp, -1, -1, TRUE, FALSE, 2);
 	}
 
 	dw_signal_connect(in_properties, DW_SIGNAL_DELETE, DW_SIGNAL_FUNC(properties_delete), NULL);
