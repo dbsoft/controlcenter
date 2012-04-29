@@ -553,7 +553,7 @@ int DWSIGNAL color_expose(HWND hwnd, DWExpose *exp, void *data)
 	int color = DW_POINTER_TO_INT(data);
 	
 	dw_color_foreground_set(current_colors[color]);
-	dw_draw_rect(hwnd, 0, DW_DRAW_FILL, exp->x, exp->y, exp->width, exp->height);
+	dw_draw_rect(hwnd, 0, DW_DRAW_FILL | DW_DRAW_NOAA, exp->x, exp->y, exp->width, exp->height);
 	
 	return TRUE;
 }
@@ -572,7 +572,7 @@ int DWSIGNAL color_click(HWND hwnd, int x, int y, int buttonmask, void *data)
 
 		dw_window_get_pos_size(hwnd, NULL, NULL, &thiswidth, &thisheight);
 		dw_color_foreground_set(newcol);
-		dw_draw_rect(hwnd, 0, DW_DRAW_FILL, 0, 0, thiswidth, thisheight);
+		dw_draw_rect(hwnd, 0, DW_DRAW_FILL | DW_DRAW_NOAA, 0, 0, thiswidth, thisheight);
 	}
 	return TRUE;
 }
@@ -794,7 +794,7 @@ void draw_box(HPIXMAP hPixmap, int x, int y, int width, int height, int indent, 
 	if(fill && ((indent + 1) * 2) < width)
 	{
 		dw_color_foreground_set(fillcolor);
-		dw_draw_rect(0, hPixmap, TRUE, x + indent + 1, y + indent + 1, width - ((indent + 1) * 2), height - ((indent + 1) * 2));
+		dw_draw_rect(0, hPixmap, DW_DRAW_FILL | DW_DRAW_NOAA, x + indent + 1, y + indent + 1, width - ((indent + 1) * 2), height - ((indent + 1) * 2));
 	}
 }
 
@@ -898,7 +898,7 @@ void graph_draw(struct _instance *inst)
 		dw_color_foreground_set(current_colors[COLOR_BACK]);
 
 		/* Clear the graph area */
-		dw_draw_rect(0, hPixmap, TRUE, LEFT_SIDE, TOP_BOTTOM, width - (LEFT_SIDE + RIGHT_SIDE), height - (TOP_BOTTOM * 2));
+		dw_draw_rect(0, hPixmap, DW_DRAW_FILL | DW_DRAW_NOAA, LEFT_SIDE, TOP_BOTTOM, width - (LEFT_SIDE + RIGHT_SIDE), height - (TOP_BOTTOM * 2));
 
 		dw_color_foreground_set(current_colors[COLOR_BAR]);
 
@@ -974,7 +974,7 @@ void graph_draw(struct _instance *inst)
 		dw_draw_line(0, hPixmap, WINDOW_BORDER, height - 1, width - 1, height - 1);
 
 		/* Draw thumb */
-		dw_draw_rect(0, hPixmap, TRUE, width - RIGHT_SIDE + 1, 1, THUMB_WIDTH + 1, height - 2);
+		dw_draw_rect(0, hPixmap, DW_DRAW_FILL | DW_DRAW_NOAA, width - RIGHT_SIDE + 1, 1, THUMB_WIDTH + 1, height - 2);
 
 		/* Draw last of the graph's border */
 		dw_color_foreground_set(current_colors[COLOR_HIGH_LIGHT]);
@@ -1029,7 +1029,7 @@ void text_draw(struct _instance *inst)
 
 			/* Clear the graph area */
 			dw_color_foreground_set(current_colors[COLOR_THUMB]);
-			dw_draw_rect(0, hPixmap, TRUE, 0, 0, width, height);
+			dw_draw_rect(0, hPixmap, DW_DRAW_FILL | DW_DRAW_NOAA, 0, 0, width, height);
 
 			draw_box(hPixmap, 0, 0, width, height, 0, DW_RGB(0,0,0), DW_RGB(0,0,0), DW_RGB(255,255,255), DW_RGB(255,255,255), 0, 0);
 
@@ -1095,7 +1095,7 @@ void bar_draw(struct _instance *inst)
 		barwidth = (int)(ratio * ((float)width));
 
 		dw_color_foreground_set(current_colors[COLOR_THUMB]);
-		dw_draw_rect(0, hPixmap, TRUE, 0, 0, width, height);
+		dw_draw_rect(0, hPixmap, DW_DRAW_FILL | DW_DRAW_NOAA, 0, 0, width, height);
 
 		draw_box(hPixmap, 0, 0, width, height, 0, DW_RGB(0,0,0), DW_RGB(0,0,0), DW_RGB(255,255,255), DW_RGB(255,255,255), 0, 0);
 
@@ -1193,7 +1193,7 @@ void desk_draw(struct _instance *inst)
 
 			/* Draw window border */
 			dw_color_foreground_set(DW_RGB(0,0,0));
-			dw_draw_rect(0, hPixmap, TRUE, 0, 0, width, height);
+			dw_draw_rect(0, hPixmap, DW_DRAW_FILL | DW_DRAW_NOAA, 0, 0, width, height);
 
 			draw_box(hPixmap, 0, 0, width, height, 0, DW_RGB(100,100,100), DW_RGB(100,100,100), DW_RGB(255,255,255), DW_RGB(255,255,255), 0, 0);
 
@@ -1257,9 +1257,9 @@ void net_draw(struct _instance *inst)
 
 		/* Draw window border */
 		dw_color_foreground_set(current_colors[COLOR_THUMB]);
-		dw_draw_rect(0, hPixmap, TRUE, 0, 0, width, height);
+		dw_draw_rect(0, hPixmap, DW_DRAW_FILL | DW_DRAW_NOAA, 0, 0, width, height);
 		dw_color_foreground_set(DW_RGB(0,0,0));
-		dw_draw_rect(0, hPixmap, TRUE, 2, 2, width - 4, height - 4);
+		dw_draw_rect(0, hPixmap, DW_DRAW_FILL | DW_DRAW_NOAA, 2, 2, width - 4, height - 4);
 
 		draw_box(hPixmap, 0, 0, width, height, 2, DW_RGB(100,100,100), DW_RGB(100,100,100), DW_RGB(255,255,255), DW_RGB(255,255,255), 0, 0);
 
@@ -1289,7 +1289,7 @@ void net_draw(struct _instance *inst)
 				{
 					int point = (int)((float)myheight * ((float)values[item]/(float)max));
 					if(point)
-						dw_draw_rect(0, hPixmap, TRUE, z,  (myheight - point) + 3, GRID_STEP, point);
+						dw_draw_rect(0, hPixmap, DW_DRAW_FILL | DW_DRAW_NOAA, z,  (myheight - point) + 3, GRID_STEP, point);
 					item++;
 				}
 			}
@@ -1308,7 +1308,7 @@ void net_draw(struct _instance *inst)
 				{
 					int point = (int)((float)myheight * ((float)values[item]/(float)max));
 					if(point)
-						dw_draw_rect(0, hPixmap, TRUE, z,  myheight + 3, GRID_STEP, point);
+						dw_draw_rect(0, hPixmap, DW_DRAW_FILL | DW_DRAW_NOAA, z,  myheight + 3, GRID_STEP, point);
 					item++;
 				}
 			}
