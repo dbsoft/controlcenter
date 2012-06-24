@@ -667,7 +667,7 @@ int DWSIGNAL display_properties(HWND hwnd, void *data)
 		dw_box_pack_start(hbox, tmp, 40, 25, FALSE, FALSE, 2);
 		tmp = dw_text_new(color_names[x], 0);
 		dw_window_set_style(tmp, DW_DT_VCENTER, DW_DT_VCENTER);
-		dw_box_pack_start(hbox, tmp, -1, -1, TRUE, FALSE, 2);
+		dw_box_pack_start(hbox, tmp, -1, -1, TRUE, TRUE, 2);
 	}
 
 	dw_signal_connect(in_properties, DW_SIGNAL_DELETE, DW_SIGNAL_FUNC(properties_delete), NULL);
