@@ -622,7 +622,7 @@ int DWSIGNAL properties_delete(HWND hwnd, void *data)
 int DWSIGNAL display_properties(HWND hwnd, void *data)
 {
 	HWND notebook, vbox, hbox, tmp;
-	ULONG page, flStyle = DW_FCF_TITLEBAR | DW_FCF_SIZEBORDER | DW_FCF_CLOSEBUTTON | DW_FCF_SYSMENU;
+	ULONG page, flStyle = DW_FCF_TITLEBAR | DW_FCF_SIZEBORDER | DW_FCF_CLOSEBUTTON | DW_FCF_SYSMENU | DW_FCF_TEXTURED;
 	int x;
 
 	/* If the window is already open, show it instead */
