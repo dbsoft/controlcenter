@@ -38,7 +38,7 @@ FunctionEnd
   InstallDirRegKey HKCU "Software\ControlCenter" ""
 
   ; Request application privileges for Windows Vista
-  RequestExecutionLevel user
+  RequestExecutionLevel admin
 
 ;--------------------------------
 ; Variables
