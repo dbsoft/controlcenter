@@ -21,6 +21,10 @@
 #if defined(__MAC__)
 #include <mach/mach.h>
 #include <mach/mach_error.h>
+#include <mach/host_info.h>
+#include <mach/mach_host.h>
+#include <mach/task_info.h>
+#include <mach/task.h>
 #endif
 #if defined(__FreeBSD__) || defined(__MAC__)
 #include <net/if_types.h>
@@ -160,21 +164,21 @@ int Get_Memory(long double *Memory)
 	sysinfo(&si);
 	/* Recent versions of Linux require multiplying by the memory unit */
 	*Memory = (long double)(si.freeram * si.mem_unit);
-#elif defined(__FreeBSD__) || defined(__MAC__)
+#elif defined(__MAC__)
+	mach_msg_type_number_t count = HOST_VM_INFO_COUNT;
+
+	vm_statistics_data_t vmstat;
+	if(host_statistics(mach_host_self(), HOST_VM_INFO, (host_info_t)&vmstat, &count) == KERN_SUCCESS)
+		*Memory = (long double)(vmstat.inactive_count + vmstat.free_count) * getpagesize();
+#elif defined(__FreeBSD__)
 	int pages_free, pages_inactive = 0;
 	size_t len;
 	
 	/* Query the free and inactive pages */
-#if defined(__MAC__)
-	len = sizeof(pages_free);
-	sysctlbyname("hw.usermem", &pages_free, &len, 0, 0);
-	pages_free = pages_free / getpagesize();
-#else
 	len = sizeof(pages_free);
 	sysctlbyname("vm.stats.vm.v_free_count", &pages_free, &len, 0, 0);
 	len = sizeof(pages_inactive);
 	sysctlbyname("vm.stats.vm.v_inactive_count", &pages_inactive, &len, 0, 0);
-#endif
 
 	/* Add them together and multiply by the page size to get the total free */
 	*Memory = (long double)(pages_free + pages_inactive) * getpagesize();
