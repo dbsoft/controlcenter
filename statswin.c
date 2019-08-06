@@ -1,6 +1,5 @@
-#include <windows.h>
-#include <iphlpapi.h>
 #include "dw.h"
+#include <iphlpapi.h>
 
 #define SystemBasicInformation       0
 #define SystemPerformanceInformation 2
