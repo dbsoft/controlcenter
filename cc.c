@@ -534,10 +534,12 @@ int DWSIGNAL delete_event(HWND hwnd, void *data)
 /* Context menus */
 int DWSIGNAL display_exit(HWND hwnd, void *data)
 {
+	dw_mutex_lock(hMtx);
 	display_active = FALSE;
 	update_pos();
 	saveconfig();
 	dw_main_quit();
+	dw_mutex_unlock(hMtx);
 	return TRUE;
 }
 
