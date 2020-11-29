@@ -9,7 +9,7 @@ GRC = @GRC@
 MAKE = @MAKE@
 MKDIR = @MKDIR@
 INSTALL = @INSTALL@
-GRESOURCE = @GRESOURCE@
+RESOURCE = @RESOURCE@
 
 LIBS = @LIBS@
 INCLUDES = @INCLUDES@
@@ -32,21 +32,20 @@ all: $(TARGET)
 $(OBJECTS): $(SOURCES)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $<
 
-resources.o:
-ifeq ($(GRESOURCE),enabled)
+gresources.o:
 	-chmod +x gtk/resources.sh
 	-gtk/resources.sh
 	$(GRC) --generate-source --target=gresources.c gtk/cc.gresource.xml
-	$(CC) $(CFLAGS) $(INCLUDES) -c gresources.c -o resources.o
-else
+	$(CC) $(CFLAGS) $(INCLUDES) -c gresources.c
+
+resources.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c gtk/resources.c
-endif
 
 statsunx.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c statsunx.c
         
-$(TARGET):  $(OBJECTS) resources.o
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(TARGET) $(OBJECTS) resources.o $(LDFLAGS) $(LIBS)
+$(TARGET):  $(OBJECTS) $(RESOURCE)
+	$(CC) $(CFLAGS) $(INCLUDES) -o $(TARGET) $(OBJECTS) $(RESOURCE) $(LDFLAGS) $(LIBS)
 	-mac/finishup.sh "$(DISPLAYNAME)" "$(TARGET)"
                 
 installer: $(TARGET)
@@ -54,7 +53,7 @@ installer: $(TARGET)
 	-mac/installer.sh "$(DISPLAYNAME)" "$(TARGET)"
 
 clean: 
-	$(RM) $(OBJECTS) resources.o gresources.c $(TARGET)
+	$(RM) $(OBJECTS) resources.o gresources.c gresources.o $(TARGET)
 	$(RM) -rf resources/
 
 distclean: clean
@@ -65,6 +64,7 @@ FORCE:
 install: FORCE
 	$(INSTALL) $(TARGET) /usr/local/bin
         
-resources.o: gtk/resources.c gtk/cc.gresource.xml
+resources.o: gtk/resources.c
+gresources.o: gtk/cc.gresource.xml
 cc.o: cc.c cc.h config.h
 statsunx.o: statsunx.c
