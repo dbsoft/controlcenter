@@ -38,6 +38,7 @@
 #endif
 #ifdef __linux__
 #include <linux/kernel.h>
+#include <sys/sysinfo.h>
 
 struct sysinfo si;
 #endif
