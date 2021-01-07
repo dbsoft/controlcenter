@@ -51,15 +51,9 @@ installer:
     copy $(DWINCPATH)\dw.dll install\package
     copy $(DWINCPATH)\dwcompat.dll install\package
     copy readme.txt install\package
-    copy readme.txt install\scripts
-    rm -f install\cc.ace install\misc.ace
-    cd install\package
-    ace2 -r a ..\cc.ace *
-    cd ..\scripts
-    ace2 a ..\misc.ace *
+    cd install
+    wic -a ccos2.exe 1 -cpackage -r * -U -s cc.wis
     cd ..
-    copy $(SFXPATH)\sfx.exe .\sfx.exe
-    packinst cc.cfg
     
 clean: 
 	rm -f $(OBJECTS) cc.exe cc.res HG.REV *~
