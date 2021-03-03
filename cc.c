@@ -410,7 +410,7 @@ int DWSIGNAL display_menu(HWND hwnd, void *data)
 	dw_signal_connect(menuitem, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(display_exit), NULL);
 
 	dw_pointer_query_pos(&px, &py);
-	dw_menu_popup(&hwndMenu, hwnd, px, py);
+	dw_menu_popup(&hwndMenu, hwndFrame, px, py);
 	return TRUE;
 }
 
