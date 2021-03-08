@@ -467,8 +467,8 @@ int DWSIGNAL display_update(void)
 		{
 			if(gList[z].Update)
 				gList[z].Update(&gList[z], 0);
-			if(gList[z].Draw && !(gList[z].Flags & fHidden))
-				gList[z].Draw(&gList[z]);
+			if(gList[z].Draw && gList[z].hwndDraw && !(gList[z].Flags & fHidden))
+				dw_render_redraw(gList[z].hwndDraw[0]);
 			z++;
 		}
 		dw_mutex_unlock(hMtx);
@@ -572,9 +572,7 @@ int DWSIGNAL color_click(HWND hwnd, int x, int y, int buttonmask, void *data)
 	{
 		current_colors[color] = newcol;
 
-		dw_window_get_pos_size(hwnd, NULL, NULL, &thiswidth, &thisheight);
-		dw_color_foreground_set(newcol);
-		dw_draw_rect(hwnd, 0, DW_DRAW_FILL | DW_DRAW_NOAA, 0, 0, thiswidth, thisheight);
+		dw_render_redraw(hwnd);
 	}
 	return TRUE;
 }
