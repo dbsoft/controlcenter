@@ -63,7 +63,7 @@ LINKFLAGS = -machine:$(TARGET_CPU) -manifest -debug -debugtype:cv
 DLLLINKFLAGS = -dll
 DEFFILE = cc.def
 
-OBJS =	cc.obj statswin.obj winmain.obj
+OBJS =	cc.obj statswin.obj
 
 all: cc.exe
 

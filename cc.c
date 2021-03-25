@@ -1544,7 +1544,7 @@ void init_drives(void)
 	}
 }
 
-int main(int argc, char *argv[])
+int dwmain(int argc, char *argv[])
 {
 	current_font = strdup(DEFFONT);
 
