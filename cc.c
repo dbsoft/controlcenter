@@ -564,9 +564,7 @@ int DWSIGNAL color_expose(HWND hwnd, DWExpose *exp, void *data)
 int DWSIGNAL color_click(HWND hwnd, int x, int y, int buttonmask, void *data)
 {
 	int color = DW_POINTER_TO_INT(data);
-	unsigned long thiswidth, thisheight, newcol;
-
-	newcol = dw_color_choose(current_colors[color]);
+	unsigned long newcol = dw_color_choose(current_colors[color]);
 
 	if(newcol != current_colors[color])
 	{

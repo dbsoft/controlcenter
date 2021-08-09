@@ -12,10 +12,12 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
+#if !defined(__IOS__)
 #include <net/route.h>
 #include <net/if.h>
 #include <net/if_arp.h>
 #include <netinet/if_ether.h>
+#endif
 #include <time.h>
 #include <fcntl.h>
 #if defined(__MAC__)
