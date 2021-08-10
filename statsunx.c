@@ -20,7 +20,7 @@
 #endif
 #include <time.h>
 #include <fcntl.h>
-#if defined(__MAC__)
+#if defined(__MAC__) || defined(__IOS__)
 #include <mach/mach.h>
 #include <mach/mach_error.h>
 #include <mach/host_info.h>
@@ -28,12 +28,14 @@
 #include <mach/task_info.h>
 #include <mach/task.h>
 #endif
-#if defined(__FreeBSD__) || defined(__MAC__)
+#if defined(__FreeBSD__) || defined(__MAC__) || defined(__IOS__)
 #include <net/if_types.h>
+#ifndef __IOS__
 #include <net/if_mib.h>
+#include <sys/dkstat.h>
+#endif
 #include <sys/sysctl.h>
 #include <sys/param.h>
-#include <sys/dkstat.h>
 #include <sys/vmmeter.h>
 #include <unistd.h>
 #include <math.h>
@@ -55,7 +57,7 @@ int Get_Uptime(unsigned long *Seconds)
 #ifdef __linux__
 	sysinfo(&si);
 	*Seconds = si.uptime;
-#elif defined(__FreeBSD__) || defined(__MAC__)
+#elif defined(__FreeBSD__) || defined(__MAC__) || defined(__IOS__)
 	struct timeval boottime;
 	size_t size = sizeof(boottime);
 	time_t now;
@@ -124,7 +126,7 @@ int Get_Load(double *Load)
 
 	lastused = used;
 	lasttotal = total;
-#elif defined(__MAC__)
+#elif defined(__MAC__) || defined(__IOS__)
 	static long lastused = 0, lasttotal = 0;
 	static double lastload = 0;
 	double used = 0, total = 0;
@@ -167,7 +169,7 @@ int Get_Memory(long double *Memory)
 	sysinfo(&si);
 	/* Recent versions of Linux require multiplying by the memory unit */
 	*Memory = (long double)(si.freeram * si.mem_unit);
-#elif defined(__MAC__)
+#elif defined(__MAC__) || defined(__IOS__)
 	mach_msg_type_number_t count = HOST_VM_INFO_COUNT;
 
 	vm_statistics_data_t vmstat;
