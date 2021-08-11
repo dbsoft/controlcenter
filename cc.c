@@ -695,9 +695,9 @@ int DWSIGNAL display_configure(HWND hwnd, int width, int height, void *data)
 
 				inst->pixmap[z] = dw_pixmap_new(inst->hwndDraw[z], width, height, 0);
 
-				inst->Draw(inst);
-
 				dw_mutex_unlock(hMtx);
+
+				dw_render_redraw(hwnd);
 
 				break;
 			}
