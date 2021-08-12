@@ -17,10 +17,10 @@
 #define DEFFONT "8.Helv"
 #elif defined(__WIN32__)
 #define DEFFONT "9.Arial"
-#elif defined(__MAC__)
+#elif defined(__MAC__) || defined(__IOS__)
 #define DEFFONT "9.Monaco"
-#else
-#define DEFFONT "10.monospace"
+#else /* GTK or Android */
+#define DEFFONT "10.Monospace"
 #endif
 
 #define fAttached       0x00000001
