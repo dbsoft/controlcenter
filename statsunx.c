@@ -76,20 +76,17 @@ int Get_Load(double *Load)
 {
 #ifdef __linux__
 	FILE *fp = fopen("/proc/stat", "r");
-	static int lastused = 0, lasttotal = 0;
+	static unsigned long lastused = 0, lasttotal = 0;
 	static double lastload = 0;
 
-	*Load =0;
+	*Load = 0;
 
 	if(fp)
 	{
-		char buf[1024];
-		int user, nice, sys, idle, used, total;
+		unsigned long user, nice, sys, idle, used, total;
 
-		if(fgets(buf, 1024, fp))
+		if(fscanf(fp, "cpu %lu %lu %lu %lu", &user, &nice, &sys, &idle) != EOF)
 		{
-		   sscanf(buf, "cpu %d %d %d %d", &user, &nice, &sys, &idle);
-
 		   used = (user+nice+sys);
 		   total = used + idle;
 
@@ -100,7 +97,23 @@ int Get_Load(double *Load)
 
 		   lastused = used;
 		   lasttotal = total;
-      }
+		}
+		fclose(fp);
+	}
+	else if((fp = fopen("/proc/loadavg", "r")))
+	{
+		int cpucores = get_nprocs();
+		float onemin, fivemin, fifteenmin;
+
+		if(fscanf(fp,"%f %f %f", &onemin, &fivemin, &fifteenmin) != EOF)
+		{
+			if(cpucores > 0)
+				*Load = ((double)onemin)/((double)cpucores);
+			else if(onemin < 1.0)
+				*Load = (double)onemin;
+			else
+				*Load = 1.0;
+		}
 		fclose(fp);
 	}
 #elif defined(__FreeBSD__)
