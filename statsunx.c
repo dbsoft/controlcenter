@@ -100,21 +100,23 @@ int Get_Load(double *Load)
 		}
 		fclose(fp);
 	}
-	else if((fp = fopen("/proc/loadavg", "r")))
+	else
 	{
-		int cpucores = get_nprocs();
-		float onemin, fivemin, fifteenmin;
+		struct sysinfo si;
 
-		if(fscanf(fp,"%f %f %f", &onemin, &fivemin, &fifteenmin) != EOF)
+		if(!sysinfo(&si))
 		{
+			int cpucores = get_nprocs();
+			float f_load = 1.f / (1 << SI_LOAD_SHIFT);
+			double onemin = (double)si.loads[0] * f_load;
+
 			if(cpucores > 0)
-				*Load = ((double)onemin)/((double)cpucores);
-			else if(onemin < 1.0)
-				*Load = (double)onemin;
+				*Load = onemin / ((double)cpucores);
+			else if (onemin < 1.0)
+				*Load = onemin;
 			else
 				*Load = 1.0;
 		}
-		fclose(fp);
 	}
 #elif defined(__FreeBSD__)
 	static long lastused = 0, lasttotal = 0;
