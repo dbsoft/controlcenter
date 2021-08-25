@@ -108,13 +108,13 @@ int Get_Load(double *Load)
 		{
 			int cpucores = get_nprocs();
 			float f_load = 1.f / (1 << SI_LOAD_SHIFT);
-			double onemin = (double)si.loads[0] * f_load;
+			double onemin = ((double)si.loads[0]) * (double)f_load;
 
-			if(cpucores > 0)
+			if(cpucores > 1)
 				*Load = onemin / ((double)cpucores);
-			else if (onemin < 1.0)
-				*Load = onemin;
 			else
+				*Load = onemin;
+			if(*Load > 1.0)
 				*Load = 1.0;
 		}
 	}
