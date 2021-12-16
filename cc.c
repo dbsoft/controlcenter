@@ -468,7 +468,15 @@ int DWSIGNAL display_update(void)
 			if(gList[z].Update)
 				gList[z].Update(&gList[z], 0);
 			if(gList[z].Draw && gList[z].hwndDraw && !(gList[z].Flags & fHidden))
+			{
+				/* Unlock the mutex to call render redaw.
+				 * We don't want to be holding the mutext if it calls
+				 * the expose callback immediately.
+				 */
+				dw_mutex_unlock(hMtx);
 				dw_render_redraw(gList[z].hwndDraw[0]);
+				dw_mutex_lock(hMtx);
+			}
 			z++;
 		}
 		dw_mutex_unlock(hMtx);
