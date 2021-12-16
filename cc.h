@@ -39,9 +39,9 @@ typedef struct _instance {
 	void(*Draw)(struct _instance *);
 	void(*Create)(struct _instance *, HWND owner);
 	void(*Update)(struct _instance *, HWND owner);
-	unsigned Flags;
+	unsigned long Flags;
 	int page;
-	int width, height, vsize;
+	unsigned long width, height, vsize;
 	void *custom, *internal;
 	HWND hwnd, other, *hwndDraw;
 	HPIXMAP *pixmap;

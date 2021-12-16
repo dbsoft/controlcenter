@@ -714,11 +714,14 @@ int DWSIGNAL display_expose(HWND hwnd, DWExpose *exp, void *data)
 
 	if(inst)
 	{
-		dw_mutex_lock(hMtx);
+		if(dw_mutex_trylock(hMtx) == DW_ERROR_NONE)
+		{
+			inst->Draw(inst);
 
-		inst->Draw(inst);
-
-		dw_mutex_unlock(hMtx);
+			dw_mutex_unlock(hMtx);
+		}
+		else
+			dw_render_redraw(hwnd);
 	}
 	return TRUE;
 }
