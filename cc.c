@@ -647,11 +647,11 @@ int DWSIGNAL display_properties(HWND hwnd, void *data)
 	dw_box_pack_start(vbox, hbox, 0, 0, FALSE, FALSE, 0);
 	tmp = dw_text_new("Display Font:", 0);
 	dw_window_set_style(tmp, DW_DT_VCENTER, DW_DT_VCENTER);
-	dw_box_pack_start(hbox, tmp, -1, -1, FALSE, TRUE, 2);
+	dw_box_pack_start(hbox, tmp, DW_SIZE_AUTO, DW_SIZE_AUTO, FALSE, TRUE, 2);
 	tmp = dw_button_new(current_font, 0);
 	dw_window_set_font(tmp, current_font);
 	dw_signal_connect(tmp, DW_SIGNAL_CLICKED, DW_SIGNAL_FUNC(font_click), NULL);
-	dw_box_pack_start(hbox, tmp, -1, -1, FALSE, FALSE, 2);
+	dw_box_pack_start(hbox, tmp, DW_SIZE_AUTO, DW_SIZE_AUTO, FALSE, FALSE, 2);
 
 	/* Create displays for all the colors */
 	for(x=0;x<COLOR_MAX;x++)
@@ -665,7 +665,7 @@ int DWSIGNAL display_properties(HWND hwnd, void *data)
 		dw_box_pack_start(hbox, tmp, 40, 25, FALSE, FALSE, 2);
 		tmp = dw_text_new(color_names[x], 0);
 		dw_window_set_style(tmp, DW_DT_VCENTER, DW_DT_VCENTER);
-		dw_box_pack_start(hbox, tmp, -1, -1, TRUE, TRUE, 2);
+		dw_box_pack_start(hbox, tmp, DW_SIZE_AUTO, DW_SIZE_AUTO, TRUE, TRUE, 2);
 	}
 
 	dw_signal_connect(in_properties, DW_SIGNAL_DELETE, DW_SIGNAL_FUNC(properties_delete), NULL);
