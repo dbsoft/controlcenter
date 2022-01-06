@@ -29,7 +29,7 @@ FunctionEnd
 
   ; Name and file
   Name "Control Center 0.6"
-  OutFile "cc05win64.exe"
+  OutFile "cc06win64.exe"
 
   ; Default installation folder
   InstallDir "$PROGRAMFILES64\Control Center"
