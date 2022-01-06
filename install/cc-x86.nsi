@@ -9,7 +9,7 @@
 ; General
 
   ; Name and file
-  Name "Control Center 0.5"
+  Name "Control Center 0.6"
   OutFile "cc05win.exe"
 
   ; Default installation folder

@@ -4,7 +4,7 @@
       PACKAGEID="Brian Smith\Control Center\Base package\0\5"
       TARGET="?:\Programs\CC"
       SELECT
-      TITLE="Control Center 0.5"
+      TITLE="Control Center 0.6"
       CREATEOBJECT="WPProgram|Control Center|<WP_DESKTOP>|EXENAME=$(1)\CC.EXE;OBJECTID=<CONTROLCENTER>;"
       >Graphical Systerm Information Control Center for OS/2 PM.</PCK>
 </HEAD>
