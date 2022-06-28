@@ -1,7 +1,7 @@
-# Control Center OS/2 Makefile
+# Control Center Makefile
 
-#DWLIBPATH=d:\work\netlabs\dwindows\lib
-#DWINCPATH=d:\work\netlabs\dwindows
+#DWLIBPATH=\work\netlabs\dwindows
+#DWINCPATH=\work\netlabs\dwindows
 
 TARGET=cc
 
@@ -42,14 +42,14 @@ cc.exe:  $(OBJECTS)
 	rc -x2 cc.res cc.exe
 #	lxlite sfx.exe
 
-# Create an installer using Installer/2...
-# Packinst and ace2 need to be in the path...
+# Create an installer using WarpIn...
+# wic needs to be in the path...
 installer:
     rm -rf install\package
     md install\package
     copy cc.exe install\package
-    copy $(DWINCPATH)\dw.dll install\package
-    copy $(DWINCPATH)\dwcompat.dll install\package
+    copy $(DWLIBPATH)\dw.dll install\package
+    copy $(DWLIBPATH)\dwcompat.dll install\package
     copy readme.txt install\package
     cd install
     wic -a ccos2.exe 1 -cpackage -r * -U -s cc.wis
