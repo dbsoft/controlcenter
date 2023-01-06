@@ -1,10 +1,10 @@
 <WARPIN>
 <HEAD>
 <PCK INDEX="1"
-      PACKAGEID="Brian Smith\Control Center\Base package\0\6"
+      PACKAGEID="Brian Smith\Control Center\Base package\0\7"
       TARGET="?:\Programs\CC"
       SELECT
-      TITLE="Control Center 0.6"
+      TITLE="Control Center"
       CREATEOBJECT="WPProgram|Control Center|<WP_DESKTOP>|EXENAME=$(1)\CC.EXE;OBJECTID=<CONTROLCENTER>;"
       >Graphical Systerm Information Control Center for OS/2 PM.</PCK>
 </HEAD>

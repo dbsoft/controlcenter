@@ -9,8 +9,8 @@
 ; General
 
   ; Name and file
-  Name "Control Center 0.6"
-  OutFile "cc06win.exe"
+  Name "Control Center"
+  OutFile "cc07win.exe"
 
   ; Default installation folder
   InstallDir "$PROGRAMFILES\Control Center"
