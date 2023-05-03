@@ -714,20 +714,9 @@ int DWSIGNAL display_expose(HWND hwnd, DWExpose *exp, void *data)
 
 	if(inst)
 	{
-#ifdef __ANDROID__
-		if(dw_mutex_trylock(hMtx) == DW_ERROR_NONE)
-		{
-#else
-			dw_mutex_lock(hMtx);
-#endif
-			inst->Draw(inst);
-
-			dw_mutex_unlock(hMtx);
-#ifdef __ANDROID__
-		}
-		else
-			dw_render_redraw(hwnd);
-#endif
+		dw_mutex_lock(hMtx);
+		inst->Draw(inst);
+		dw_mutex_unlock(hMtx);
 	}
 	return TRUE;
 }
@@ -1556,6 +1545,11 @@ int dwmain(int argc, char *argv[])
 	current_font = strdup(DEFFONT);
 
 	loadconfig();
+
+	/* Make sure safe rendering mode is enabled on all platforms.
+	 * This will prevent out of EXPOSE event rendering.
+	 */
+	dw_feature_set(DW_FEATURE_RENDER_SAFE, DW_FEATURE_ENABLED);
 
 	dw_init(TRUE, argc, argv);
 
